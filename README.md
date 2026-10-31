@@ -1,4 +1,4 @@
-# Electromagnetic Levitation (Maglev) — Finite Element Analysis (FEA) & System Dynamics Suite
+﻿# Electromagnetic Levitation (Maglev) — Finite Element Analysis (FEA) & System Dynamics Suite
 ### (Elektromanyetik Levitasyon Maglev — Sonlu Elemanlar Analizi FEA ve Sistem Dinamiği Paketi)
 
 <div align="center">
@@ -14,7 +14,7 @@
 
 <br/>
 
-[![Launch Live Calculator](https://img.shields.io/badge/🚀_CANLI_HESAPLAYICIYI_AÇ_(LIVE_STUDIO)-Maglev_Canli_Hesaplayici.html-2563eb?style=for-the-badge)](https://raw.githack.com/rasittaflan/Electromagnetic-Levitation-FEA-Simulations/main/Maglev_Canli_Hesaplayici.html)
+[![Launch Live Calculator](https://img.shields.io/badge/🚀_CANLI_HESAPLAYICIYI_AÇ_(LIVE_STUDIO)-Maglev_Canli_Hesaplayici.html-2563eb?style=for-the-badge)](https://rasittaflan.github.io/Electromagnetic-Levitation-FEA-Simulations/Maglev_Canli_Hesaplayici.html)
 
 <br/>
 
@@ -37,7 +37,7 @@
 
 > [!TIP]
 > Click the button below to launch the **100% interactive web calculator** directly in your browser without any installation:  
-> 👉 [**🚀 Launch Live Maglev Design Studio (Canlı Tasarım Stüdyosunu Başlat)**](https://raw.githack.com/rasittaflan/Electromagnetic-Levitation-FEA-Simulations/main/Maglev_Canli_Hesaplayici.html)
+> 👉 [**🚀 Launch Live Maglev Design Studio (Canlı Tasarım Stüdyosunu Başlat)**](https://rasittaflan.github.io/Electromagnetic-Levitation-FEA-Simulations/Maglev_Canli_Hesaplayici.html)
 
 You can modify coil turns ($N$), excitation current ($I$), air gap ($g$), and pole area in real time to calculate the magnetic lifting force ($F_{mag}$), flux density ($B$), and verify system equilibrium.
 
@@ -94,7 +94,7 @@ Energy error and mesh refinement iterations were conducted in Ansys Maxwell to e
 
 | File / Dosya | Format | Live Launch / Canlı Aç | Purpose & Capabilities / Amaç ve Kapsam |
 | :--- | :---: | :---: | :--- |
-| **[`Maglev_Canli_Hesaplayici.html`](./Maglev_Canli_Hesaplayici.html)** | `HTML5 / JS` | [**🚀 Launch Live**](https://raw.githack.com/rasittaflan/Electromagnetic-Levitation-FEA-Simulations/main/Maglev_Canli_Hesaplayici.html) | **Interactive Maglev Design Studio:** Canlı hava aralığı, akım, sarım sayısı ve manyetik kaldırma kuvveti ($F_{mag}$) hesaplayıcısı. |
+| **[`Maglev_Canli_Hesaplayici.html`](./Maglev_Canli_Hesaplayici.html)** | `HTML5 / JS` | [**🚀 Launch Live**](https://rasittaflan.github.io/Electromagnetic-Levitation-FEA-Simulations/Maglev_Canli_Hesaplayici.html) | **Interactive Maglev Design Studio:** Canlı hava aralığı, akım, sarım sayısı ve manyetik kaldırma kuvveti ($F_{mag}$) hesaplayıcısı. |
 | **[`T2209EM_V1_4p8A_Dogrulama.aedt`](./simulations/ansys_maxwell/T2209EM_V1_4p8A_Dogrulama.aedt)** | `Ansys AEDT` | — | Ansys Maxwell 2D/3D doğrulanmış sonlu elemanlar magnetostatik simülasyon modeli. |
 | **[`TUBITAK_Maglev_Ekip_Sunumu_Final.slx`](./simulations/matlab_simulink/TUBITAK_Maglev_Ekip_Sunumu_Final.slx)** | `Simulink` | — | Doğrusal olmayan levitasyon dinamiği, PID ve termal dayanım Simulink kapalı çevrim modeli. |
 
