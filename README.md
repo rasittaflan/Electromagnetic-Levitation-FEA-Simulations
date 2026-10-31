@@ -2,6 +2,10 @@
 
 <div align="center">
 
+<img src="./assets/banner.svg" alt="Electromagnetic Levitation Ansys Maxwell FEA & System Dynamics Suite Banner" width="100%" />
+
+<br/>
+
 [![TÜBİTAK 2209-B](https://img.shields.io/badge/TÜBİTAK-2209--B_Industry_Oriented_R%26D-00529B?style=for-the-badge&logo=target&logoColor=white)](#)
 [![FEA Core](https://img.shields.io/badge/FEA_Engine-Ansys_Maxwell_2D%2F3D-ff5722?style=for-the-badge&logo=ansys)](#)
 [![Dynamics](https://img.shields.io/badge/Control_Dynamics-MATLAB_%7C_Simulink-0076A8?style=for-the-badge&logo=mathworks)](#)
@@ -48,25 +52,6 @@ flowchart TD
 
 ---
 
-## 📁 Repository Structure
-
-```text
-Electromagnetic-Levitation-FEA-Simulations/
-├── assets/                                 # FEA flux contours, B-H curves, and Simulink plots
-├── docs/                                   # Full technical reports & research proposals
-│   └── TUBITAK_2209_28-09-2026_Elektromanyetik_Levitasyon_Ansys_Maxwell_FEA_V1_Raporu.docx
-├── simulations/
-│   ├── ansys_maxwell/                      # 2D/3D FEA Maxwell designs (.aedt)
-│   │   ├── T2209EM_V1_4p8A_Dogrulama.aedt
-│   │   ├── T2209EM_V1_4p8A_MeshDogrulama.aedt
-│   │   └── T2209EM_V1_4p8A_MeshTest.aedt
-│   └── matlab_simulink/                    # System dynamics & PID closed-loop models
-├── .gitignore                              # Clean repository filter for FEA/MATLAB artifacts
-└── README.md                               # Master technical documentation
-```
-
----
-
 ## 🔬 Finite Element Analysis (FEA) Highlights
 
 ### 1. Static Magnetic Field & Flux Density Distribution
@@ -78,6 +63,36 @@ Electromagnetic-Levitation-FEA-Simulations/
   <img src="./assets/image4.png" alt="Magnetic Flux Density Distribution" width="85%" />
   <p><em>Figure 1: Magnetic flux density (B-Field) contour and flux lines across the E-core / U-core electromagnet and 5 mm air gap.</em></p>
 </div>
+
+### 2. Mesh Refinement & Finite Element Convergence
+Energy error and mesh refinement iterations were conducted in Ansys Maxwell to ensure that the finite element mesh reaches convergence without singular field anomalies:
+
+<div align="center">
+  <img src="./assets/image10.png" alt="Mesh Verification and Field Convergence" width="85%" />
+  <p><em>Figure 2: Mesh discretization and element distribution across the core, coils, and air-gap boundary.</em></p>
+</div>
+
+---
+
+## 📁 Repository Structure
+
+```text
+Electromagnetic-Levitation-FEA-Simulations/
+├── assets/                                 # FEA flux contours, B-H curves, and banner
+│   ├── banner.svg                          # High-res vector architecture banner
+│   ├── image4.png                          # 2D/3D B-Field flux density distribution
+│   └── image10.png                         # Mesh verification & convergence plot
+├── docs/                                   # Full technical reports & research proposals
+│   └── TUBITAK_2209_28-09-2026_Elektromanyetik_Levitasyon_Ansys_Maxwell_FEA_V1_Raporu.docx
+├── simulations/
+│   ├── ansys_maxwell/                      # 2D/3D FEA Maxwell designs (.aedt)
+│   │   ├── T2209EM_V1_4p8A_Dogrulama.aedt
+│   │   ├── T2209EM_V1_4p8A_MeshDogrulama.aedt
+│   │   └── T2209EM_V1_4p8A_MeshTest.aedt
+│   └── matlab_simulink/                    # System dynamics & PID closed-loop models
+├── .gitignore                              # Clean repository filter for FEA/MATLAB artifacts
+└── README.md                               # Master technical documentation
+```
 
 ---
 
