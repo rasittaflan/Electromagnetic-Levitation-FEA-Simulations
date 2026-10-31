@@ -1,4 +1,4 @@
-﻿# Electromagnetic Levitation (Maglev) — Finite Element Analysis (FEA) & System Dynamics Suite
+# Electromagnetic Levitation (Maglev) — Finite Element Analysis (FEA) & System Dynamics Suite
 ### (Elektromanyetik Levitasyon Maglev — Sonlu Elemanlar Analizi FEA ve Sistem Dinamiği Paketi)
 
 <div align="center">
@@ -94,7 +94,8 @@ Energy error and mesh refinement iterations were conducted in Ansys Maxwell to e
 
 | File / Dosya | Format | Live Launch / Canlı Aç | Purpose & Capabilities / Amaç ve Kapsam |
 | :--- | :---: | :---: | :--- |
-| **[`Maglev_Canli_Hesaplayici.html`](./Maglev_Canli_Hesaplayici.html)** | `HTML5 / JS` | [**🚀 Launch Live**](https://rasittaflan.github.io/Electromagnetic-Levitation-FEA-Simulations/Maglev_Canli_Hesaplayici.html) | **Interactive Maglev Design Studio:** Canlı hava aralığı, akım, sarım sayısı ve manyetik kaldırma kuvveti ($F_{mag}$) hesaplayıcısı. |
+| **[`index.html`](./index.html)** | `HTML5 / Three.js` | [**🚀 Launch 3D Studio**](https://rasittaflan.github.io/Electromagnetic-Levitation-FEA-Simulations/) | **3D Digital Twin & FEA Studio:** TÜBİTAK 2209-B Hyperloop ve Silindirik V1 Elektromıknatıs 3B simülasyon ortamı. |
+| **[`Maglev_Canli_Hesaplayici.html`](./Maglev_Canli_Hesaplayici.html)** | `HTML5 / Three.js` | [**🚀 Launch Live**](https://rasittaflan.github.io/Electromagnetic-Levitation-FEA-Simulations/Maglev_Canli_Hesaplayici.html) | **Interactive Maglev Design Studio:** Canlı hava aralığı, akım, sarım sayısı ve manyetik kaldırma kuvveti ($F_{mag}$) hesaplayıcısı. |
 | **[`T2209EM_V1_4p8A_Dogrulama.aedt`](./simulations/ansys_maxwell/T2209EM_V1_4p8A_Dogrulama.aedt)** | `Ansys AEDT` | — | Ansys Maxwell 2D/3D doğrulanmış sonlu elemanlar magnetostatik simülasyon modeli. |
 | **[`TUBITAK_Maglev_Ekip_Sunumu_Final.slx`](./simulations/matlab_simulink/TUBITAK_Maglev_Ekip_Sunumu_Final.slx)** | `Simulink` | — | Doğrusal olmayan levitasyon dinamiği, PID ve termal dayanım Simulink kapalı çevrim modeli. |
 
@@ -150,3 +151,4 @@ Electromagnetic-Levitation-FEA-Simulations/
 **[⬆ Back to Top / Başa Dön](#english-documentation)**
 
 </div>
+
