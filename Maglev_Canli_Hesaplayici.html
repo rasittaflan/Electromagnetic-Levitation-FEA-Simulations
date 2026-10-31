@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elektromanyetik Levitasyon (Maglev) — Canlı Hesaplayıcı & Simülasyon Stüdyosu</title>
+    <title>Elektromanyetik Levitasyon (Maglev) — 3D Canlı Simülasyon & Tasarım Stüdyosu</title>
+    <!-- Three.js 3D WebGL Library & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
         :root {
             --bg-dark: #0a0f1d;
@@ -24,19 +27,19 @@
             padding: 24px;
             line-height: 1.6;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
         header {
             text-align: center;
-            padding: 30px 20px;
+            padding: 26px 20px;
             background: linear-gradient(135deg, #111827 0%, #1e1b4b 100%);
             border: 1px solid var(--card-border);
             border-radius: 16px;
             margin-bottom: 24px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
         }
-        h1 { font-size: 2.2rem; color: #fff; margin-bottom: 8px; }
-        .subtitle { color: var(--accent-blue); font-size: 1.1rem; margin-bottom: 12px; }
-        .meta-chips { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        h1 { font-size: 2.1rem; color: #fff; margin-bottom: 6px; }
+        .subtitle { color: var(--accent-blue); font-size: 1.05rem; margin-bottom: 12px; }
+        .meta-chips { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .chip {
             background: #1f2937;
             color: #e2e8f0;
@@ -45,21 +48,21 @@
             font-size: 0.85rem;
             border: 1px solid #374151;
         }
-        .grid {
+        .main-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 380px 1fr;
             gap: 24px;
             margin-bottom: 24px;
         }
-        @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 992px) { .main-grid { grid-template-columns: 1fr; } }
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 14px;
-            padding: 24px;
+            padding: 22px;
         }
         .card h2 {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             margin-bottom: 16px;
             color: var(--accent-blue);
             border-bottom: 1px solid var(--card-border);
@@ -68,78 +71,113 @@
             align-items: center;
             gap: 8px;
         }
-        .input-group {
-            margin-bottom: 16px;
-        }
+        .input-group { margin-bottom: 14px; }
         .input-group label {
             display: block;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
-        .input-group input, .input-group select {
+        .input-group input {
             width: 100%;
-            padding: 10px 14px;
+            padding: 9px 12px;
             background: #0f172a;
             border: 1px solid #334155;
             border-radius: 8px;
             color: #fff;
-            font-size: 1rem;
+            font-size: 0.95rem;
             outline: none;
             transition: border-color 0.2s;
         }
         .input-group input:focus { border-color: var(--accent-blue); }
-        .result-box {
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
+        .kpi-box {
             background: #0b1120;
             border-radius: 10px;
-            padding: 16px;
-            border-left: 4px solid var(--accent-blue);
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 12px;
+            border-left: 3px solid var(--accent-blue);
         }
-        .result-title { font-size: 0.95rem; color: var(--text-muted); }
-        .result-val { font-size: 1.4rem; font-weight: bold; color: var(--accent-green); }
-        .visual-box {
-            text-align: center;
-            padding: 20px;
-            background: #0b1120;
+        .kpi-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .kpi-val { font-size: 1.3rem; font-weight: bold; color: var(--accent-green); margin-top: 4px; }
+        
+        /* 3D Viewport Styles */
+        #viewport3d {
+            width: 100%;
+            height: 480px;
+            background: #050811;
             border-radius: 12px;
-            border: 1px dashed #334155;
-            margin-top: 16px;
+            border: 1px solid #334155;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
         }
-        .airgap-display {
-            font-size: 1.1rem;
-            color: var(--accent-amber);
-            margin-bottom: 10px;
+        .viewport-overlay {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            pointer-events: none;
+            z-index: 10;
         }
-        .armature-box {
-            width: 200px;
-            height: 24px;
-            background: #64748b;
-            border: 2px solid #94a3b8;
-            border-radius: 4px;
-            margin: 0 auto;
-            transition: transform 0.2s ease-out;
-        }
-        .status-badge {
+        .viewport-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #38bdf8;
+            background: rgba(15, 23, 42, 0.75);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
             display: inline-block;
-            padding: 6px 14px;
-            border-radius: 20px;
+        }
+        .viewport-hint {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 4px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .viewport-controls {
+            position: absolute;
+            bottom: 14px;
+            right: 16px;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+        }
+        .btn-view {
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-view:hover { background: #334155; color: #fff; border-color: #38bdf8; }
+        .status-bar {
+            margin-top: 12px;
+            padding: 10px 16px;
+            border-radius: 8px;
             font-weight: bold;
             font-size: 0.9rem;
-            margin-top: 10px;
+            text-align: center;
         }
-        .status-ok { background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid #22c55e; }
-        .status-warn { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+        .status-ok { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid #22c55e; }
+        .status-warn { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid #f43f5e; }
         footer {
             text-align: center;
-            padding: 20px;
+            padding: 16px;
             color: var(--text-muted);
             font-size: 0.85rem;
             border-top: 1px solid var(--card-border);
-            margin-top: 24px;
         }
     </style>
 </head>
@@ -147,105 +185,248 @@
 
 <div class="container">
     <header>
-        <h1>⚡ Elektromanyetik Levitasyon (Maglev) Tasarım Stüdyosu</h1>
-        <div class="subtitle">Ansys Maxwell FEA & Manyetik Kaldırma Kuvveti Analitik Hesaplayıcısı</div>
+        <h1>⚡ Elektromanyetik Levitasyon (Maglev) 3D Tasarım Stüdyosu</h1>
+        <div class="subtitle">Ansys Maxwell 3D Doğrulamalı Dinamik Levitasyon ve Manyetik Kuvvet Simülatörü</div>
         <div class="meta-chips">
             <span class="chip">🏛️ Karadeniz Teknik Üniversitesi (KTÜ)</span>
             <span class="chip">🎯 TÜBİTAK 2209-B Projesi</span>
-            <span class="chip">🧲 FEA Doğrulamalı Model</span>
+            <span class="chip">🌐 WebGL & Three.js 3D Engine</span>
             <span class="chip">👨‍💻 Muhammet Raşit Taflan</span>
         </div>
     </header>
 
-    <div class="grid">
-        <!-- SOL PANEL: TASARIM GİRDİLERİ -->
+    <div class="main-grid">
+        <!-- SOL PANEL: PARAMETRİK GİRDİLER -->
         <div class="card">
-            <h2>⚙️ Manyetik ve Elektriksel Girdiler</h2>
+            <h2>⚙️ Manyetik ve Geometrik Girdiler</h2>
             
             <div class="input-group">
                 <label for="turns">Bobin Sarım Sayısı (N - Tur):</label>
-                <input type="number" id="turns" value="500" min="50" max="2500" step="10" oninput="calculate()">
+                <input type="number" id="turns" value="650" min="50" max="3000" step="10" oninput="updateSimulation()">
             </div>
 
             <div class="input-group">
                 <label for="current">Bobin Uyarım Akımı (I - Amper):</label>
-                <input type="number" id="current" value="4.8" min="0.1" max="15.0" step="0.1" oninput="calculate()">
+                <input type="number" id="current" value="4.8" min="0.1" max="15.0" step="0.1" oninput="updateSimulation()">
             </div>
 
             <div class="input-group">
                 <label for="airgap">Hava Aralığı (g - mm):</label>
-                <input type="number" id="airgap" value="5.0" min="1.0" max="25.0" step="0.5" oninput="calculate()">
+                <input type="number" id="airgap" value="5.0" min="1.0" max="25.0" step="0.5" oninput="updateSimulation()">
             </div>
 
             <div class="input-group">
                 <label for="poleArea">Kutup Yüzey Alanı (A - mm²):</label>
-                <input type="number" id="poleArea" value="1200" min="100" max="5000" step="50" oninput="calculate()">
+                <input type="number" id="poleArea" value="1800" min="200" max="8000" step="50" oninput="updateSimulation()">
             </div>
 
             <div class="input-group">
-                <label for="targetMass">Hedef Asılı Kütle (m - kg):</label>
-                <input type="number" id="targetMass" value="10.0" min="0.5" max="50.0" step="0.5" oninput="calculate()">
+                <label for="targetMass">Hedef Kütle (m - kg):</label>
+                <input type="number" id="targetMass" value="12.0" min="0.5" max="50.0" step="0.5" oninput="updateSimulation()">
             </div>
 
             <div class="input-group">
-                <label for="relPerm">Nüve Bağıl Manyetik Geçirgenliği (&mu;r):</label>
-                <input type="number" id="relPerm" value="2500" min="100" max="10000" step="100" oninput="calculate()">
+                <label for="relPerm">Nüve Bağıl Geçirgenliği (&mu;r):</label>
+                <input type="number" id="relPerm" value="3000" min="100" max="10000" step="100" oninput="updateSimulation()">
+            </div>
+
+            <div style="margin-top: 16px; font-size: 0.8rem; color: #94a3b8; background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #1e293b;">
+                💡 <strong>İpucu:</strong> Girdileri değiştirdikçe sağdaki 3D modelde elektromıknatıs akı çizgileri, hava aralığı mesafesi ve armature plakası gerçek zamanlı tepki verir.
             </div>
         </div>
 
-        <!-- SAĞ PANEL: HESAPLANAN ÇIKTILAR & CANLI GÖRSELLEŞTİRME -->
-        <div class="card">
-            <h2>📊 Hesaplanan Sonuçlar & Kuvvet Dengesi</h2>
-
-            <div class="result-box">
-                <div>
-                    <div class="result-title">Manyetik Kaldırma Kuvveti (F_mag)</div>
-                    <div style="font-size: 0.8rem; color: #64748b;">Analitik Maxwell Gerilme Tensörü Hesabı</div>
+        <!-- SAĞ PANEL: CANLI 3D VIEWPORT VE KPI METRİKLERİ -->
+        <div class="card" style="padding: 16px;">
+            <div class="kpi-grid">
+                <div class="kpi-box">
+                    <div class="kpi-title">Kaldırma Kuvveti</div>
+                    <div class="kpi-val" id="resForce">142.8 N</div>
                 </div>
-                <div class="result-val" id="resForce">145.2 N</div>
+                <div class="kpi-box" style="border-left-color: var(--accent-amber);">
+                    <div class="kpi-title">Yerçekimi Yükü</div>
+                    <div class="kpi-val" id="resWeight" style="color: var(--accent-amber);">117.7 N</div>
+                </div>
+                <div class="kpi-box" style="border-left-color: var(--accent-rose);">
+                    <div class="kpi-title">Hava Akı Yoğunluğu</div>
+                    <div class="kpi-val" id="resFlux" style="color: var(--accent-rose);">1.42 T</div>
+                </div>
+                <div class="kpi-box" style="border-left-color: #a855f7;">
+                    <div class="kpi-title">Manyetomotor Kuvvet</div>
+                    <div class="kpi-val" id="resMMF" style="color: #a855f7;">3120 A·t</div>
+                </div>
             </div>
 
-            <div class="result-box" style="border-left-color: var(--accent-amber);">
-                <div>
-                    <div class="result-title">Gereken Yerçekimi Kuvveti (W = m·g)</div>
-                    <div style="font-size: 0.8rem; color: #64748b;">Yerçekimi Sabiti: 9.81 m/s²</div>
+            <!-- THREE.JS 3D CANVAS VIEWPORT -->
+            <div id="viewport3d">
+                <div class="viewport-overlay">
+                    <div class="viewport-title">🛰️ 3D INTERACTIVE LEVITATION STAGE</div><br/>
+                    <div class="viewport-hint">🖱️ Fare ile Döndür | Tekerlek ile Yakınlaş | Sağ Tık ile Kaydır</div>
                 </div>
-                <div class="result-val" id="resWeight" style="color: var(--accent-amber);">98.1 N</div>
+
+                <div class="viewport-controls">
+                    <button class="btn-view" onclick="resetCamera()">Reset Görünüm</button>
+                    <button class="btn-view" onclick="setTopView()">Üstten Bakış</button>
+                    <button class="btn-view" onclick="setSideView()">Yandan Bakış</button>
+                </div>
             </div>
 
-            <div class="result-box" style="border-left-color: var(--accent-rose);">
-                <div>
-                    <div class="result-title">Hava Aralığı Akı Yoğunluğu (B_gap)</div>
-                    <div style="font-size: 0.8rem; color: #64748b;">Doyum Sınırı: 1.80 Tesla</div>
-                </div>
-                <div class="result-val" id="resFlux" style="color: var(--accent-rose);">1.24 T</div>
-            </div>
-
-            <div class="result-box" style="border-left-color: #a855f7;">
-                <div>
-                    <div class="result-title">Manyetomotor Kuvvet (MMF = N·I)</div>
-                    <div style="font-size: 0.8rem; color: #64748b;">Toplam Amper-Sarım</div>
-                </div>
-                <div class="result-val" id="resMMF" style="color: #a855f7;">2400 A·t</div>
-            </div>
-
-            <!-- Canlı Dinamik Levitasyon Hissiyatı -->
-            <div class="visual-box">
-                <div class="airgap-display">Hava Aralığı Boşluğu: <span id="dispGap">5.0</span> mm</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">[ SABİT ELEKTROMIKNATIS GÖVDESİ ]</div>
-                <div id="armature" class="armature-box"></div>
-                <div id="statusBadge" class="status-badge status-ok">✅ LEVİTASYON BAŞARILI (F_mag &gt; W)</div>
+            <div id="statusAlert" class="status-bar status-ok">
+                ✅ LEVİTASYON BAŞARILI: Manyetik kaldırma kuvveti (142.8 N) hedef kütle yükünü (117.7 N) kararlı şekilde taşımaktadır.
             </div>
         </div>
     </div>
 
     <footer>
-        Elektromanyetik Levitasyon (Maglev) Tasarım ve Analiz Paketi &copy; 2026 | Muhammet Raşit Taflan | Karadeniz Teknik Üniversitesi
+        Elektromanyetik Levitasyon (Maglev) Ansys Maxwell FEA & 3D WebGL Simülasyon Paketi &copy; 2026 | Muhammet Raşit Taflan | Karadeniz Teknik Üniversitesi
     </footer>
 </div>
 
 <script>
-    function calculate() {
+    // --- THREE.JS 3D SAHNE KURULUMU ---
+    const container = document.getElementById('viewport3d');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x060913);
+    scene.fog = new THREE.FogExp2(0x060913, 0.025);
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    camera.position.set(0, 5, 14);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+    // --- IŞIKLANDIRMA ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
+    dirLight.position.set(8, 12, 10);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    const spotLight = new THREE.SpotLight(0xf59e0b, 1.5);
+    spotLight.position.set(-8, 10, -5);
+    scene.add(spotLight);
+
+    // Grid Floor
+    const gridHelper = new THREE.GridHelper(24, 24, 0x334155, 0x1e293b);
+    gridHelper.position.y = -3.5;
+    scene.add(gridHelper);
+
+    // --- ELEKTROMIKNATIS GRUBU (STATOR) ---
+    const magnetGroup = new THREE.Group();
+    magnetGroup.position.set(0, 2.2, 0);
+
+    // E/U Core Nüve (Çelik Gövde)
+    const coreMaterial = new THREE.MeshStandardMaterial({
+        color: 0x334155,
+        roughness: 0.3,
+        metalness: 0.8
+    });
+
+    // Ana Arka Boyunduruk
+    const backYokeGeo = new THREE.BoxGeometry(6.4, 1.2, 2.4);
+    const backYoke = new THREE.Mesh(backYokeGeo, coreMaterial);
+    backYoke.castShadow = true;
+    magnetGroup.add(backYoke);
+
+    // Sol Kutup
+    const poleGeo = new THREE.BoxGeometry(1.4, 2.2, 2.4);
+    const leftPole = new THREE.Mesh(poleGeo, coreMaterial);
+    leftPole.position.set(-2.2, -1.5, 0);
+    leftPole.castShadow = true;
+    magnetGroup.add(leftPole);
+
+    // Sağ Kutup
+    const rightPole = new THREE.Mesh(poleGeo, coreMaterial);
+    rightPole.position.set(2.2, -1.5, 0);
+    rightPole.castShadow = true;
+    magnetGroup.add(rightPole);
+
+    // Bakır Bobinler (Copper Winding)
+    const copperMaterial = new THREE.MeshStandardMaterial({
+        color: 0xd97706,
+        roughness: 0.4,
+        metalness: 0.9,
+        emissive: 0x78350f,
+        emissiveIntensity: 0.2
+    });
+
+    const coilGeo = new THREE.BoxGeometry(1.8, 1.4, 2.8);
+    const leftCoil = new THREE.Mesh(coilGeo, copperMaterial);
+    leftCoil.position.set(-2.2, -1.3, 0);
+    magnetGroup.add(leftCoil);
+
+    const rightCoil = new THREE.Mesh(coilGeo, copperMaterial);
+    rightCoil.position.set(2.2, -1.3, 0);
+    magnetGroup.add(rightCoil);
+
+    scene.add(magnetGroup);
+
+    // --- LEVITASYON HEDEFİ (ARMATURE - ASILI PLAKA) ---
+    const armatureGeo = new THREE.BoxGeometry(6.8, 0.8, 2.8);
+    const armatureMat = new THREE.MeshStandardMaterial({
+        color: 0x64748b,
+        roughness: 0.2,
+        metalness: 0.9,
+        emissive: 0x1e293b,
+        emissiveIntensity: 0.1
+    });
+    const armatureMesh = new THREE.Mesh(armatureGeo, armatureMat);
+    armatureMesh.castShadow = true;
+    armatureMesh.receiveShadow = true;
+    scene.add(armatureMesh);
+
+    // Manyetik Akı Çizgileri Eğrileri (Flux Lines)
+    const fluxLinesGroup = new THREE.Group();
+    scene.add(fluxLinesGroup);
+
+    function createFluxCurves(colorHex, intensity) {
+        fluxLinesGroup.clear();
+        const fluxMat = new THREE.LineBasicMaterial({
+            color: colorHex,
+            transparent: true,
+            opacity: Math.min(Math.max(intensity, 0.25), 0.95),
+            linewidth: 2
+        });
+
+        // Sol kutup akı çizgileri
+        for (let i = -1; i <= 1; i += 0.5) {
+            const curve = new THREE.QuadraticBezierCurve3(
+                new THREE.Vector3(-2.2, magnetGroup.position.y - 2.6, i),
+                new THREE.Vector3(-2.4, (magnetGroup.position.y - 2.6 + armatureMesh.position.y + 0.4) / 2, i),
+                new THREE.Vector3(-2.2, armatureMesh.position.y + 0.4, i)
+            );
+            const points = curve.getPoints(12);
+            const geo = new THREE.BufferGeometry().setFromPoints(points);
+            fluxLinesGroup.add(new THREE.Line(geo, fluxMat));
+        }
+
+        // Sağ kutup akı çizgileri
+        for (let i = -1; i <= 1; i += 0.5) {
+            const curve = new THREE.QuadraticBezierCurve3(
+                new THREE.Vector3(2.2, magnetGroup.position.y - 2.6, i),
+                new THREE.Vector3(2.4, (magnetGroup.position.y - 2.6 + armatureMesh.position.y + 0.4) / 2, i),
+                new THREE.Vector3(2.2, armatureMesh.position.y + 0.4, i)
+            );
+            const points = curve.getPoints(12);
+            const geo = new THREE.BufferGeometry().setFromPoints(points);
+            fluxLinesGroup.add(new THREE.Line(geo, fluxMat));
+        }
+    }
+
+    // --- HESAPLAMA & DİNAMİK 3D GÜNCELLEME MOTORU ---
+    let targetArmatureY = -0.5;
+
+    function updateSimulation() {
         const N = parseFloat(document.getElementById('turns').value) || 0;
         const I = parseFloat(document.getElementById('current').value) || 0;
         const g_mm = parseFloat(document.getElementById('airgap').value) || 1;
@@ -253,50 +434,88 @@
         const m = parseFloat(document.getElementById('targetMass').value) || 0;
         const mu_r = parseFloat(document.getElementById('relPerm').value) || 2000;
 
-        const g = g_mm * 1e-3; // mm to m
-        const A = A_mm2 * 1e-6; // mm2 to m2
+        const g = g_mm * 1e-3;
+        const A = A_mm2 * 1e-6;
         const mu_0 = 4 * Math.PI * 1e-7;
 
-        // Manyetomotor kuvvet
         const mmf = N * I;
-
-        // Manyetik akı yoğunluğu B = (mu_0 * N * I) / (2 * g) (basitleştirilmiş çift hava aralığı)
-        // Nüve relüktansı da hesaba katılırsa:
         const R_air = (2 * g) / (mu_0 * A);
-        const R_core = 0.2 / (mu_0 * mu_r * A); // Ortalama 20 cm nüve yolu
+        const R_core = 0.22 / (mu_0 * mu_r * A);
         const R_total = R_air + R_core;
 
         const Phi = mmf / R_total;
-        const B = Math.min(Phi / A, 1.95); // Doyum üst sınırı
+        const B = Math.min(Phi / A, 1.95);
 
-        // Kaldırma kuvveti (Maxwell Stress Tensor): F = (B^2 * A) / mu_0 (çift kutup için 2 * (B^2 * A / (2*mu_0)))
+        // Manyetik Kuvvet (Maxwell Gerilme Tensörü Hesabı: F = B^2 * A / mu_0)
         const F_mag = (B * B * A) / mu_0;
         const W = m * 9.81;
 
-        // Sonuçları yazdır
+        // Sonuçları Ekrana Yazdır
         document.getElementById('resForce').innerText = F_mag.toFixed(1) + " N";
         document.getElementById('resWeight').innerText = W.toFixed(1) + " N";
         document.getElementById('resFlux').innerText = B.toFixed(2) + " T";
         document.getElementById('resMMF').innerText = Math.round(mmf) + " A·t";
-        document.getElementById('dispGap').innerText = g_mm.toFixed(1);
 
-        // Dinamik görsel hareket
-        const armature = document.getElementById('armature');
-        const badge = document.getElementById('statusBadge');
-        const translateY = Math.min(Math.max((g_mm - 5) * 4, -10), 30);
-        armature.style.transform = `translateY(${translateY}px)`;
-
+        const alertBox = document.getElementById('statusAlert');
         if (F_mag >= W) {
-            badge.className = "status-badge status-ok";
-            badge.innerText = "✅ LEVİTASYON BAŞARILI (F_mag ≥ Ağırlık)";
+            alertBox.className = "status-bar status-ok";
+            alertBox.innerHTML = `✅ LEVİTASYON BAŞARILI: Manyetik kaldırma kuvveti (${F_mag.toFixed(1)} N), kütle yükünü (${W.toFixed(1)} N) kararlı şekilde havada tutmaktadır.`;
         } else {
-            badge.className = "status-badge status-warn";
-            badge.innerText = "⚠️ YETERSİZ KALDIRMA (F_mag < Ağırlık - Düşme Riski)";
+            alertBox.className = "status-bar status-warn";
+            alertBox.innerHTML = `⚠️ YETERSİZ KALDIRMA KUVVETİ: Kaldırma kuvveti (${F_mag.toFixed(1)} N) kütle yükünden (${W.toFixed(1)} N) düşüktür. Akımı veya sarımı artırınız!`;
         }
+
+        // 3D Modelde Hava Aralığı Konumunu Güncelle
+        // g_mm = 5mm -> aralık = 1.0 birim
+        const gapUnits = THREE.MathUtils.mapLinear(g_mm, 1, 20, 0.4, 2.8);
+        targetArmatureY = (magnetGroup.position.y - 2.6) - gapUnits - 0.4;
+
+        // Akı yoğunluğuna göre renk belirleme (FEA Spectral Color)
+        let fluxColor = 0x38bdf8;
+        if (B > 1.6) fluxColor = 0xef4444;      // Kırmızı (Doyum)
+        else if (B > 1.2) fluxColor = 0xf59e0b; // Turuncu
+        else if (B > 0.8) fluxColor = 0x22c55e; // Yeşil
+        createFluxCurves(fluxColor, B / 1.8);
     }
 
-    // İlk çalıştırma
-    calculate();
+    // Kamera Kontrol Kısayolları
+    function resetCamera() {
+        camera.position.set(0, 5, 14);
+        controls.target.set(0, 0, 0);
+    }
+    function setTopView() {
+        camera.position.set(0, 16, 0.1);
+        controls.target.set(0, 0, 0);
+    }
+    function setSideView() {
+        camera.position.set(16, 0.5, 0);
+        controls.target.set(0, 0, 0);
+    }
+
+    // Pencere Boyutlandırma
+    window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    // Animasyon Döngüsü (Pürüzsüz Havada Salınım Fiziği)
+    let clock = new THREE.Clock();
+    function animate() {
+        requestAnimationFrame(animate);
+        const elapsedTime = clock.getElapsedTime();
+
+        // Armature pozisyonunu lerp ile yumuşak hareket ettir + hafif mikro süzülme titreşimi
+        const hoverJitter = Math.sin(elapsedTime * 4) * 0.025;
+        armatureMesh.position.y += (targetArmatureY + hoverJitter - armatureMesh.position.y) * 0.1;
+
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    // Başlat
+    updateSimulation();
+    animate();
 </script>
 
 </body>
