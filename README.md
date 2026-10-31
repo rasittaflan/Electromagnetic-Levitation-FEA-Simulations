@@ -1,4 +1,5 @@
 # Electromagnetic Levitation (Maglev) — Finite Element Analysis (FEA) & System Dynamics Suite
+### (Elektromanyetik Levitasyon Maglev — Sonlu Elemanlar Analizi FEA ve Sistem Dinamiği Paketi)
 
 <div align="center">
 
@@ -9,6 +10,7 @@
 [![TÜBİTAK 2209-B](https://img.shields.io/badge/TÜBİTAK-2209--B_Industry_Oriented_R%26D-00529B?style=for-the-badge&logo=target&logoColor=white)](#)
 [![FEA Core](https://img.shields.io/badge/FEA_Engine-Ansys_Maxwell_2D%2F3D-ff5722?style=for-the-badge&logo=ansys)](#)
 [![Dynamics](https://img.shields.io/badge/Control_Dynamics-MATLAB_%7C_Simulink-0076A8?style=for-the-badge&logo=mathworks)](#)
+[![Live Calculator](https://img.shields.io/badge/🚀_CANLI_HESAPLAYICIYI_AÇ-HTML5_Studio-2563eb?style=for-the-badge)](./Maglev_Canli_Hesaplayici.html)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](#)
 
 <br/>
@@ -22,24 +24,25 @@
 <a id="english-documentation"></a>
 
 # 🇬🇧 Electromagnetic Levitation System Design & FEA Simulation Suite
+### *(Elektromanyetik Levitasyon Sistemi Tasarım ve FEA Simülasyon Paketi)*
 
 > **Comprehensive electromagnetic, finite element analysis (FEA), and closed-loop control dynamics package for an industrial-grade Electromagnetic Levitation (Maglev) system**, developed within the scope of the **TÜBİTAK 2209-B University-Industry Collaborative Research Project** at **Karadeniz Technical University (KTU)**.
 
 ---
 
-## ✨ Project Overview & Highlights
+## ✨ Project Overview & Highlights / Proje Özeti ve Başarımları
 
-| Parameter | Specification | Engineering Impact |
+| Parameter / Parametre | Specification / Değer | Engineering Impact / Mühendislik Etkisi |
 | :--- | :--- | :--- |
-| **Target Working Air Gap ($g$)** | **$5\text{ mm}$** | Stable levitation operating point for industrial conveyor/transport applications. |
-| **Lifting Force Capacity ($F_{mag}$)** | **$\ge 130\text{ N}$** | High force-to-volume ratio verified across 2D/3D static FEA models. |
-| **Excitation Current ($I_{nom}$)** | **$4.8\text{ A}$** | Optimized for thermal durability and conductor current density limits ($J \le 4.5\text{ A/mm}^2$). |
-| **Core Material** | **High Permeability Silicon Steel / Soft Magnetic** | High magnetic saturation flux density ($B_{sat} \approx 1.8\text{ T}$) minimizing core losses. |
-| **Control Strategy** | **PID + Anti-Windup + Current Limiter** | Real-time position tracking and disturbance rejection under external load variations. |
+| **Target Working Air Gap ($g$)** / Hedef Hava Aralığı | **$5\text{ mm}$** | Stable levitation operating point for industrial conveyor/transport applications. *(Kararlı çalışma noktası)* |
+| **Lifting Force Capacity ($F_{mag}$)** / Kaldırma Kuvveti | **$\ge 130\text{ N}$** | High force-to-volume ratio verified across 2D/3D static FEA models. *(2D/3D statik FEA ile doğrulanmış güç)* |
+| **Excitation Current ($I_{nom}$)** / Nominal Uyarım Akımı | **$4.8\text{ A}$** | Optimized for thermal durability and conductor current density limits ($J \le 4.5\text{ A/mm}^2$). *(Isıl dayanım)* |
+| **Core Material** / Nüve Malzemesi | **Silicon Steel / Soft Magnetic** | High magnetic saturation flux density ($B_{sat} \approx 1.8\text{ T}$) minimizing core losses. *(Düşük kayıp)* |
+| **Control Strategy** / Kontrol Algoritması | **PID + Anti-Windup + Limiter** | Real-time position tracking and disturbance rejection under external load variations. *(Konum takibi)* |
 
 ---
 
-## 🧭 System Architecture & Multiphysics Workflow
+## 🧭 System Architecture & Multiphysics Workflow / Sistem Mimarisi
 
 ```mermaid
 flowchart TD
@@ -52,9 +55,14 @@ flowchart TD
 
 ---
 
-## 🔬 Finite Element Analysis (FEA) Highlights
+## 🚀 Live Interactive Studio / Canlı Etkileşimli Hesaplayıcı
+Repoda yer alan **[`Maglev_Canli_Hesaplayici.html`](./Maglev_Canli_Hesaplayici.html)** dosyasını tarayıcınızda açarak; sarım sayısı ($N$), bobin akımı ($I$), hava aralığı ($g$) ve kutup alanı girdilerini anlık değiştirip manyetik kaldırma kuvvetini ($F_{mag}$) ve akı yoğunluğunu ($B$) canlı olarak simüle edebilirsiniz.
 
-### 1. Static Magnetic Field & Flux Density Distribution
+---
+
+## 🔬 Finite Element Analysis (FEA) Highlights / FEA Analiz Bulguları
+
+### 1. Static Magnetic Field & Flux Density Distribution / Manyetik Akı Dağılımı
 - **Finite Element Solver:** Ansys Maxwell 2D (Axisymmetric) and 3D Magnetostatic Solver.
 - **Air Gap Analysis:** Parametric sweep conducted across $1\text{ mm} \le g \le 10\text{ mm}$.
 - **Flux Leakage Reduction:** Optimized pole face geometry to focus the magnetic flux lines directly into the levitated target armature.
@@ -64,7 +72,7 @@ flowchart TD
   <p><em>Figure 1: Magnetic flux density (B-Field) contour and flux lines across the E-core / U-core electromagnet and 5 mm air gap.</em></p>
 </div>
 
-### 2. Mesh Refinement & Finite Element Convergence
+### 2. Mesh Refinement & Finite Element Convergence / Mesh Hassasiyeti
 Energy error and mesh refinement iterations were conducted in Ansys Maxwell to ensure that the finite element mesh reaches convergence without singular field anomalies:
 
 <div align="center">
@@ -74,7 +82,7 @@ Energy error and mesh refinement iterations were conducted in Ansys Maxwell to e
 
 ---
 
-## 📁 Repository Structure
+## 📁 Repository Structure / Depo Klasör Mimarisi
 
 ```text
 Electromagnetic-Levitation-FEA-Simulations/
@@ -90,6 +98,7 @@ Electromagnetic-Levitation-FEA-Simulations/
 │   │   ├── T2209EM_V1_4p8A_MeshDogrulama.aedt
 │   │   └── T2209EM_V1_4p8A_MeshTest.aedt
 │   └── matlab_simulink/                    # System dynamics & PID closed-loop models
+├── Maglev_Canli_Hesaplayici.html           # 100% Offline Interactive Maglev Calculator & Studio
 ├── .gitignore                              # Clean repository filter for FEA/MATLAB artifacts
 └── README.md                               # Master technical documentation
 ```
