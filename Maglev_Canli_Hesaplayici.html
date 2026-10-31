@@ -6,17 +6,6 @@
 <title>TÜBİTAK 2209-B · Hyperloop Elektromanyetik Levitasyon Dijital İkiz Stüdyosu (v3.2)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script>
-window.onerror = function(msg, url, line, col, err) {
-  document.title = 'JS_ERROR: ' + msg + ' LINE:' + line + ' COL:' + col;
-  var b = document.body || document.documentElement;
-  var d = document.createElement('div');
-  d.id = 'criticalErrorBanner';
-  d.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:red;color:white;font-size:20px;z-index:999999;padding:20px;';
-  d.textContent = 'KRITIK JS HATASI: ' + msg + ' (Satır: ' + line + ', Sütun: ' + col + ')';
-  b.appendChild(d);
-};
-</script>
 <style>
 :root {
   /* Renk Paleti (Koyu Lacivert Mühendislik Teması) */
@@ -681,7 +670,7 @@ footer { margin-top: 16px; font-size: 12.5px; color: var(--text-dim); text-align
           <div class="bar" id="lgBar"></div>
           <div class="ticks" id="lgTicks"></div>
         </div>
-        <div class="src">Veri Kaynağı: Eksenel Biot-Savart Ağı<br>(Analitik Model · FEM Mesh Değildir)</div>
+        <div class="src">Analitik Tahmin<br>(Biot-Savart &amp; Eşdeğer Nüve)</div>
         <select id="inScale" style="margin-top:6px;pointer-events:auto;font-size:12px;">
           <option value="0.3">Ölçek: 0 – 0.3 T</option>
           <option value="0.6" selected>Ölçek: 0 – 0.6 T</option>
@@ -731,7 +720,7 @@ footer { margin-top: 16px; font-size: 12.5px; color: var(--text-dim); text-align
         </div>
         <div class="v" id="mF" style="color:var(--accent-cyan);">482.3 mN</div>
 
-        <!-- AŞAMA 3: ANSYS FEA vs Analitik Model Karşılaştırma Blokları -->
+        <!-- ANSYS Maxwell FEA vs Analitik Model Karşılaştırma Matrisi -->
         <div class="fea-matrix-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:12.5px;">
           <div style="background:#131d2e;padding:8px;border-radius:6px;border:1px solid #1e293b;">
             <div style="color:#94a3b8;font-size:11px;font-weight:700;">🎯 ANSYS MAXWELL REFERANSI</div>
@@ -780,10 +769,9 @@ footer { margin-top: 16px; font-size: 12.5px; color: var(--text-dim); text-align
           <span class="tag" id="tgCoil">İnceleniyor</span>
         </div>
         <div class="v" id="mCoil" style="color:var(--accent-rose);">%192 · 12.5 A/mm²</div>
-        <div id="coilFeasibilityNotice"></div>
         <button class="details-btn" onclick="toggleDetails('dCoil')">▾ Geometrik Taşma, İletken &amp; İmalat Analizi</button>
         <div class="details-box" id="dCoil">
-
+          <div id="coilFeasibilityNotice"></div>
           <table style="margin-top:6px;">
             <tr><td>Kullanılabilir Pencere Alanı (W_b × H_b)</td><td id="tWin">100 mm²</td></tr>
             <tr><td>Çıplak Bakır İletken Kesiti (Ø0.70 mm)</td><td id="tAwire">0.385 mm²</td></tr>
@@ -791,12 +779,9 @@ footer { margin-top: 16px; font-size: 12.5px; color: var(--text-dim); text-align
             <tr><td>Net Bakır Doluluk Faktörü (k_cu)</td><td id="tAtot">192.4 mm² (%192)</td></tr>
             <tr><td>Mevcut Pencerede Maks. İmal Sarımı (N_max)</td><td id="tNmax">116 tur (Pratik) / 199 tur (Teorik)</td></tr>
             <tr><td>500 Tur İçin Gereken Min. Pencere</td><td id="tWinReq">428 mm² (W_b ≥ 21.4 mm)</td></tr>
-            <tr><td>500 Tur İçin Önerilen Tel Çapı</td><td id="tWireRec">≤ Ø0.33 mm (AWG 28)</td></tr>
-            <tr><td>Güç Kaybı &amp; Direnç (P_cu, R_20)</td><td id="tPower">27.5 W (1.19 Ω, 27.5 m tel)</td></tr>
-            <tr><td>Tahmini Bobin Sıcaklığı (T_coil)</td><td id="tTemp">~75°C (Doğal Hava Soğutması)</td></tr>
-
-
-
+            <tr><td>500 Tur İçin Önerilen Tel Çapı</td><td id="tWireRec">Ø0.33 mm (AWG 28)</td></tr>
+            <tr><td>Tahmini Bobin Sıcaklığı (T_coil)</td><td id="tCoilTemp">~52.5 °C (ΔT = +27.5 °C)</td></tr>
+            <tr><td>Güç Kaybı / Direnç (P_cu, R_20)</td><td id="tPower">27.5 W (1.19 Ω)</td></tr>
           </table>
         </div>
       </div>
@@ -964,16 +949,16 @@ footer { margin-top: 16px; font-size: 12.5px; color: var(--text-dim); text-align
 <div class="modal-overlay" id="chartModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 id="modalTitle" style="font-size:15px;white-space:nowrap;">Grafik İnceleme</h3>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;margin:0 8px;" id="modalChartTabs">
-        <button class="btn-mini" onclick="openModal('pid')">📉 z(t) PID</button>
-        <button class="btn-mini" onclick="openModal('fg')">⚡ F(g) Boşluk</button>
-        <button class="btn-mini" onclick="openModal('fi')">🧲 F(I) Doyum</button>
-        <button class="btn-mini" onclick="openModal('bi')">🌐 B(I) Akı</button>
-        <button class="btn-mini" onclick="openModal('err')">⚠️ e(t) Hata</button>
-        <button class="btn-mini" onclick="openModal('pcu')">🔥 P_cu(I) Joule</button>
+      <h3 id="modalTitle">Grafik İnceleme</h3>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="btn-mini active" id="mTab_pid" onclick="openModal('pid')">z(t) &amp; I(t)</button>
+        <button class="btn-mini" id="mTab_fg" onclick="openModal('fg')">F(g)</button>
+        <button class="btn-mini" id="mTab_fi" onclick="openModal('fi')">F(I)</button>
+        <button class="btn-mini" id="mTab_bi" onclick="openModal('bi')">B(I)</button>
+        <button class="btn-mini" id="mTab_err" onclick="openModal('err')">e(t)</button>
+        <button class="btn-mini" id="mTab_pcu" onclick="openModal('pcu')">P_cu(I)</button>
+        <button class="modal-close" onclick="closeModal()" style="margin-left:8px;">✕ Kapat</button>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕ Kapat</button>
     </div>
     <canvas id="modalCanvas" class="modal-canvas"></canvas>
     <div style="display:flex;justify-content:space-between;font-size:13px;color:#cbd5e1;margin-top:10px;">
@@ -1023,22 +1008,22 @@ function bGapModel(N, I, g, D) {
   return FEM_P2.B * Math.sqrt(forceModel(N, I, g, D) / FEM_P2.F / Math.pow(D / 10.0, 2));
 }
 
-// Bobin Elektriksel, Isıl ve Geometrik Geçerlilik Hesabı (AÅAMA 2 BİLİMSEL MODEL)
+// Bobin Elektriksel, Isıl ve Geometrik Geçerlilik Hesabı (AŞAMA 2 BİLİMSEL MODEL)
 function coilElectrical(N, I, D) {
   const rc = D / 2.0;
   const ri = rc + 1.0; // 1 mm karkas iç yarıçapı
   const ro = ri + 5.0; // 5 mm sarım derinliği (W_b = 5.0 mm)
   const h = 20.0;      // Eksenel sarım uzunluğu (H_b = 20.0 mm)
-  const win = (ro - ri) * h; // Geometrik pencere alanı: 100.0 mmÂ²
+  const win = (ro - ri) * h; // Geometrik pencere alanı: 100.0 mm²
 
   // İletken ve Yalıtımlı Tel Kesit Alanları
-  const aw_cu = Math.PI * Math.pow(WIRE_CU_MM / 2.0, 2); // 0.3848 mmÂ²
-  const aw_ext = Math.PI * Math.pow(WIRE_EXT_MM / 2.0, 2); // 0.4536 mmÂ²
-  const aw_cell_ortho = (Math.sqrt(3) / 2.0) * Math.pow(WIRE_EXT_MM, 2); // 0.5002 mmÂ² (sıkı hekzagonal sarım)
+  const aw_cu = Math.PI * Math.pow(WIRE_CU_MM / 2.0, 2); // 0.3848 mm²
+  const aw_ext = Math.PI * Math.pow(WIRE_EXT_MM / 2.0, 2); // 0.4536 mm²
+  const aw_cell_ortho = (Math.sqrt(3) / 2.0) * Math.pow(WIRE_EXT_MM, 2); // 0.5002 mm² (sıkı hekzagonal sarım)
 
   // Net Bakır ve Paketleme Doluluk Oranları
-  const totalCuArea = N * aw_cu; // Toplam çıplak bakır alanı (mmÂ²)
-  const totalPackArea = N * aw_cell_ortho; // Sıkı hekzagonal yerleşim alanı (mmÂ²)
+  const totalCuArea = N * aw_cu; // Toplam çıplak bakır alanı (mm²)
+  const totalPackArea = N * aw_cell_ortho; // Sıkı hekzagonal yerleşim alanı (mm²)
   const fillCu = totalCuArea / win; // Net bakır doluluk faktörü (k_cu)
   const fillPack = totalPackArea / win; // Paketleme faktörü (k_pack)
 
@@ -1046,26 +1031,26 @@ function coilElectrical(N, I, D) {
   const isFeasible = (fillPack <= 1.0) && (fillCu <= 0.58);
   const N_max_practical = Math.floor((win * 0.45) / aw_cu); // Pratik k_cu=0.45 sarım kapasitesi
   const N_max_theoretical = Math.floor(win / aw_cell_ortho); // İdeal sıkı hekzagonal sarım sınırı
-  const win_required_min = totalPackArea / 0.95; // %95 sıkılıkla gereken pencere (mmÂ²)
-  const win_required_practical = totalCuArea / 0.45; // Pratik sarım için gereken pencere (mmÂ²)
+  const win_required_min = totalPackArea / 0.95; // %95 sıkılıkla gereken pencere (mm²)
+  const win_required_practical = totalCuArea / 0.45; // Pratik sarım için gereken pencere (mm²)
   const min_bobbin_width = win_required_practical / h; // mm
   const alt_wire_d_cu = Math.sqrt((4.0 * win * 0.42) / (N * Math.PI)); // Mevcut pencere için önerilen iletken çapı (mm)
 
   // Elektriksel ve Isıl Parametreler
   const meanRadius = (ri + ro) / 2.0; // mm
   const len = N * 2 * Math.PI * meanRadius * 1e-3; // m
-  const R = 1.72e-8 * len / (aw_cu * 1e-6); // ohm (20Â°C bakır özdirenci)
+  const R = 1.72e-8 * len / (aw_cu * 1e-6); // ohm (20°C bakır özdirenci)
   const P = I * I * R; // W Joule kaybı
-  const J = I / aw_cu; // A/mmÂ² akım yoğunluğu
+  const J = I / aw_cu; // A/mm² akım yoğunluğu
 
   // Bobin Yüzey Isı Dağılımı ve Sıcaklık Tahmini
-  const surf_area_m2 = (2 * Math.PI * ro * h + 2 * Math.PI * (ro * ro - ri * ri)) * 1e-6; // mÂ²
-  const h_conv = 18.0; // W/(mÂ²·K) doğal konveksiyon katsayısı
-  const deltaT = P / Math.max(1e-4, h_conv * surf_area_m2); // Â°C
-  const T_coil = 25.0 + deltaT; // Â°C (25Â°C ortam referansı)
+  const surf_area_m2 = (2 * Math.PI * ro * h + 2 * Math.PI * (ro * ro - ri * ri)) * 1e-6; // m²
+  const h_conv = 18.0; // W/(m²·K) doğal konveksiyon katsayısı
+  const deltaT = P / Math.max(1e-4, h_conv * surf_area_m2); // °C
+  const T_coil = 25.0 + deltaT; // °C (25°C ortam referansı)
 
   return {
-    win, aw: aw_cu, aw_cu, aw_ext, totalWireArea: totalCuArea, totalCuArea, totalPackArea,
+    win, aw: aw_cu, aw_cu, aw_ext, aw_cell_ortho, totalWireArea: totalCuArea, totalCuArea, totalPackArea,
     fill: fillCu, fillCu, fillPack, isFeasible,
     N_max_practical, N_max_theoretical,
     win_required_min, win_required_practical, min_bobbin_width, alt_wire_d_cu,
@@ -1105,7 +1090,7 @@ function simulatePID(p, Ieq) {
       ts.push(k * dt);
       zs.push(z * 1e3);
       is.push(I);
-es.push(e * 1e3);
+      es.push(e * 1e3);
     }
     if (z <= 0.0002) { status = 'contact'; break; }
     if (z > 0.025) { status = 'drop'; break; }
@@ -1629,84 +1614,83 @@ function update() {
   const Ftot = F * p.n;
   const Wlab = p.mLab * GRAV;
 
-      // FEA Doğrulama Matrisi ve Metrik Kartları (AÅAMA 1 & 3)
+  // Level-1 Metrik Kartları ve FEA Doğrulama Matrisi
   $('mF').textContent = fmtN(F);
   const atP1 = p.N === 500 && p.D === 10 && p.g === 5 && Math.abs(p.I - 1.0) < 1e-6;
   const atP2 = p.N === 500 && p.D === 10 && p.g === 5 && Math.abs(p.I - 4.8) < 1e-6;
   const tg = $('tgF');
-  const tgFem = $('tgFem');
 
-  let femRefStr = 'N/A (Sadece 1.0 A & 4.8 A)';
-  let femDiffStr = 'Model Tahmini';
-  let femStatusBadge = '⚠ï¸ Analitik Model';
+  let feaRefText = '0.482 N @ 4.8 A ref.';
+  let feaRefDesc = 'AEDT 2D/3D Manyetostatik Raporu';
+  let analyticDesc = '2-Noktalı Doyum + Relüktans Modeli';
+  let diffText = 'Model Tahmini';
+  let statusText = 'Analitik Tahmin';
 
   if (atP1) {
     tg.className = 'tag tf'; tg.textContent = 'FEA (1.0 A Doğrulanmış)';
-    if (tgFem) { tgFem.className = 'tag tf'; tgFem.textContent = 'FEA Raporu (1.0 A)'; }
-    femRefStr = `${fmtN(FEM_P1.F)} (0.022 N / 2.27 g)`;
-    femDiffStr = `ΔF = 0.0000 N (%0.00)`;
-    femStatusBadge = '✅ Tam Doğrulandı (Rapor)';
+    feaRefText = '0.022 N (@ 1.0 A, 5mm)';
+    feaRefDesc = 'AEDT Manyetostatik Raporu (Resmi)';
+    diffText = 'ΔF = 0.0 mN (%0.0)';
+    statusText = 'Doğrulanmış Nokta (Rapor)';
   } else if (atP2) {
     tg.className = 'tag tu'; tg.textContent = 'FEA (4.8 A Beyanı)';
-    if (tgFem) { tgFem.className = 'tag tu'; tgFem.textContent = 'FEA Referansı (4.8 A)'; }
-    femRefStr = `${fmtN(FEM_P2.F)} (0.482 N / 49.17 g)`;
-    femDiffStr = `ΔF = 0.0000 N (%0.00)`;
-    femStatusBadge = '✅ Tam Doğrulandı (Beyan)';
+    feaRefText = '482.3 mN (@ 4.8 A, 5mm)';
+    feaRefDesc = 'Yüksek Uyarım Beyanı Referansı';
+    diffText = 'ΔF = 0.0 mN (%0.0)';
+    statusText = 'Doğrulanmış Nokta (Beyan)';
   } else {
     tg.className = 'tag ta'; tg.textContent = 'Analitik + Relüktans';
-    if (tgFem) { tgFem.className = 'tag ta'; tgFem.textContent = 'Analitik Tahmin'; }
-    femRefStr = (p.g === 5.0 && p.D === 10 && p.N === 500) ? (p.I <= 1.0 ? '0.022 N ref.' : '0.482 N ref.') : 'FEA Dışı Parametre';
-    femDiffStr = 'FEA Doğrulama Aralığı Dışında';
-    femStatusBadge = 'â„¹ï¸ Sayısal Ekstrapolasyon';
+    feaRefText = (p.g === 5.0 && p.D === 10 && p.N === 500) ? (p.I <= 1.0 ? '0.022 N ref.' : '0.482 N ref.') : 'FEA Dışı Çalışma Noktası';
+    feaRefDesc = 'Simülasyon Noktası Dışı Parametre';
+    diffText = 'FEA Doğrulama Noktası Dışında';
+    statusText = 'Analitik Ekstrapolasyon';
   }
 
-  if ($('sFemRefVal')) $('sFemRefVal').textContent = femRefStr;
-  if ($('sFemAnaVal')) $('sFemAnaVal').textContent = `${fmtN(F)} (Biot-Savart/Relüktans)`;
-  if ($('sFemDiffVal')) $('sFemDiffVal').textContent = femDiffStr;
-  if ($('sFemStatusVal')) $('sFemStatusVal').textContent = femStatusBadge;
+  if ($('cardFeaRefVal')) $('cardFeaRefVal').textContent = feaRefText;
+  if ($('cardFeaRefDesc')) $('cardFeaRefDesc').textContent = feaRefDesc;
+  if ($('cardAnalyticVal')) $('cardAnalyticVal').textContent = `${fmtN(F)} (Hesaplanan)`;
+  if ($('cardAnalyticDesc')) $('cardAnalyticDesc').textContent = analyticDesc;
+  if ($('cardModelDiff')) $('cardModelDiff').textContent = diffText;
+  if ($('cardModelStatus')) $('cardModelStatus').textContent = statusText;
 
   $('mB').textContent = (B * 1000).toFixed(1) + ' mT';
   $('sBcore').textContent = CAL.Bcore.toFixed(2) + ' T';
   $('sBcoil').textContent = (CAL.Bcoil * 1000).toFixed(1) + ' mT';
 
-  // Bobin Fiziksel ve Geometrik Geçerlilik Tablosu (AÅAMA 2)
+  // Bobin Fiziksel ve Geometrik Geçerlilik Tablosu
   const tgCoil = $('tgCoil');
   const coilNotice = $('coilFeasibilityNotice');
-  $('mCoil').textContent = `%${(el.fillCu * 100).toFixed(0)} Bakır · %${(el.fillPack * 100).toFixed(0)} Paket · ${el.J.toFixed(1)} A/mmÂ² · ${el.P.toFixed(1)} W`;
-  $('tWin').textContent = el.win.toFixed(0) + ' mmÂ²';
-  if ($('tWinUsable')) $('tWinUsable').textContent = el.win.toFixed(1) + ' mmÂ²';
-  $('tAwire').textContent = el.aw_cu.toFixed(3) + ' mmÂ²';
-  if ($('tWireCuArea')) $('tWireCuArea').textContent = `${el.aw_cu.toFixed(4)} mmÂ² (Ø${WIRE_CU_MM.toFixed(2)} mm)`;
-  if ($('tWireExtArea')) $('tWireExtArea').textContent = `${el.aw_ext.toFixed(4)} mmÂ² (Ø${WIRE_EXT_MM.toFixed(2)} mm Grade-1)`;
-  $('tAtot').textContent = el.totalCuArea.toFixed(1) + ' mmÂ²';
-  if ($('tFillNetCu')) $('tFillNetCu').textContent = `%${(el.fillCu * 100).toFixed(1)} (Teorik Bakır)`;
-  if ($('tFillPack')) $('tFillPack').textContent = `%${(el.fillPack * 100).toFixed(1)} (Sıkı Paketleme)`;
-  if ($('tMaxTurns')) $('tMaxTurns').textContent = `${el.N_max_practical} tur (Pratik) / ${el.N_max_theoretical} tur (Teorik Sınır)`;
-  if ($('tReqWin')) $('tReqWin').textContent = `${el.win_required_practical.toFixed(0)} mmÂ² (W_b ≥ ${el.min_bobbin_width.toFixed(1)} mm)`;
-  if ($('tAltGauge')) $('tAltGauge').textContent = `Ø${el.alt_wire_d_cu.toFixed(2)} mm (veya daha ince)`;
-  if ($('tCoilTemp')) $('tCoilTemp').textContent = `${el.T_coil.toFixed(1)} Â°C (ΔT = +${el.deltaT.toFixed(1)} Â°C)`;
+  $('mCoil').textContent = `%${(el.fillCu * 100).toFixed(0)} Bakır · %${(el.fillPack * 100).toFixed(0)} Paket · ${el.J.toFixed(1)} A/mm² · ${el.P.toFixed(1)} W`;
+  $('tWin').textContent = el.win.toFixed(0) + ' mm²';
+  $('tAwire').textContent = el.aw_cu.toFixed(3) + ' mm²';
+  if ($('tAext')) $('tAext').textContent = (el.aw_cell_ortho != null ? el.aw_cell_ortho.toFixed(3) : '0.500') + ' mm²';
+  $('tAtot').textContent = `${el.totalCuArea.toFixed(1)} mm² (%${(el.fillCu * 100).toFixed(0)})`;
+  if ($('tNmax')) $('tNmax').textContent = `${el.N_max_practical} tur (Pratik) / ${el.N_max_theoretical} tur (Teorik)`;
+  if ($('tWinReq')) $('tWinReq').textContent = `${el.win_required_practical.toFixed(0)} mm² (W_b ≥ ${el.min_bobbin_width.toFixed(1)} mm)`;
+  if ($('tWireRec')) $('tWireRec').textContent = `Ø${el.alt_wire_d_cu.toFixed(2)} mm (veya daha ince)`;
+  if ($('tCoilTemp')) $('tCoilTemp').textContent = `~${el.T_coil.toFixed(1)} °C (ΔT = +${el.deltaT.toFixed(1)} °C)`;
   $('tPower').textContent = `${el.P.toFixed(1)} W (${el.R.toFixed(2)} Ω, ${el.len.toFixed(1)} m tel)`;
 
   if (!el.isFeasible) {
     tgCoil.className = 'tag tw';
-    tgCoil.textContent = 'âŒ Fiziksel Taşma!';
+    tgCoil.textContent = '❌ Fiziksel Taşma!';
     coilNotice.innerHTML = `
       <div class="note nw" style="margin-bottom:8px;">
-        <strong>âŒ TASARIM GEOMETRİK OLARAK UYGULANABİLİR DEÄİL! (Paketleme Faktörü: %${(el.fillPack * 100).toFixed(0)})</strong><br>
-        ${p.N} tur Ø${WIRE_CU_MM.toFixed(2)} mm çıplak (Ø${WIRE_EXT_MM.toFixed(2)} mm Grade-1 emaye) bakır tel sıkı hekzagonal sarımda en az <strong>${el.totalPackArea.toFixed(1)} mmÂ²</strong> brüt sarım alanı kaplar. Mevcut bobin karkas pencere alanı ise <strong>${el.win.toFixed(0)} mmÂ²</strong> olup paketleme oranı <strong>%${(el.fillPack * 100).toFixed(0)}</strong>, net bakır doluluk faktörü ise <strong>%${(el.fillCu * 100).toFixed(0)}</strong> seviyesindedir.<br>
-        <em>Not: ANSYS Maxwell 'stranded' tel modelinde teller tek tek modellenmeyip akım pencereye homojen dağıtıldığı için yazılım hata vermez; ancak prototip atölyesinde bu bobin bu pencereye <strong>fiziksel olarak sarılamaz</strong>.</em><br>
-        <strong>Mühendislik Çözüm Önerileri:</strong><br>
-        1. <strong>Tel Çapı Revizyonu:</strong> Tel çapını <strong>Ø${el.alt_wire_d_cu.toFixed(2)} mm</strong> veya daha ince bir çapa düşürünüz (akım yoğunluğu ve direnç artar).<br>
-        2. <strong>Karkas Genişletme:</strong> Bobin pencere genişliğini (W_b) en az <strong>${el.min_bobbin_width.toFixed(1)} mm</strong>'ye çıkarınız.<br>
-        3. <strong>Tur Sayısı Optimizasyonu:</strong> Mevcut pencere için güvenli pratik sarım üst limiti <strong>${el.N_max_practical} tur</strong>'dur.
+        <strong>❌ TASARIM GEOMETRİK OLARAK UYGULANABİLİR DEĞİL! (Doluluk: %${(el.fillPack * 100).toFixed(0)})</strong><br>
+        ${p.N} tur Ø${WIRE_CU_MM.toFixed(2)} mm çıplak (Ø${WIRE_EXT_MM.toFixed(2)} mm emaye) bakır tel sıkı hekzagonal sarımda en az <strong>${el.totalPackArea.toFixed(1)} mm²</strong> alan kaplar. Mevcut bobin pencere alanı ise <strong>${el.win.toFixed(0)} mm²</strong> olup paketleme oranı <strong>%${(el.fillPack * 100).toFixed(0)}</strong>, net bakır doluluk faktörü ise <strong>%${(el.fillCu * 100).toFixed(0)}</strong> seviyesindedir.<br>
+        <em>Not: ANSYS Maxwell 'stranded' tel modelinde teller tek tek modellenmeyip akım pencereye homojen dağıtıldığı için yazılım çözebilir; ancak gerçek prototip atölyesinde bu bobin bu karkasa <strong>fiziksel olarak sarılamaz</strong>.</em><br>
+        <strong>Mühendislik Çözüm Önerisi:</strong><br>
+        1. Tel çapını <strong>Ø${el.alt_wire_d_cu.toFixed(2)} mm</strong> veya altına düşürünüz.<br>
+        2. Karkas pencere genişliğini en az <strong>${el.min_bobbin_width.toFixed(1)} mm</strong>'ye büyütünüz.<br>
+        3. Mevcut pencerede sarılabilecek güvenli pratik limit <strong>${el.N_max_practical} tur</strong>dur.
       </div>`;
   } else {
     tgCoil.className = 'tag tf';
     tgCoil.textContent = '✅ Geometrik Uygun';
-    coilNotice.innerHTML = `<div class="note ns" style="margin-bottom:8px;">✅ <strong>Tasarım Geometrik Olarak Uygulanabilir:</strong> Bobin paketleme faktörü (%${(el.fillPack * 100).toFixed(1)}) ve bakır doluluğu (%${(el.fillCu * 100).toFixed(1)}) karkas sınırları içerisindedir.</div>`;
+    coilNotice.innerHTML = `<div class="note ns" style="margin-bottom:8px;">✅ <strong>Tasarım Geometrik Olarak Uygulanabilir:</strong> Bobin pencere doluluk faktörü (%${(el.fillPack * 100).toFixed(1)}) pratik sarım sınırları içerisindedir.</div>`;
   }
 
-  // Kapsül Kaldırma Dengesi ve Fizibilite (AÅAMA 4)
+  // Kapsül Dengesi ve Fizibilite Uyarısı
   const podLevRatio = (Ftot / Wpod) * 100;
   $('mPod').textContent = `${Ftot.toFixed(2)} N / ${Wpod.toFixed(0)} N (%${podLevRatio.toFixed(2)})`;
   const podNotice = $('podFeasibilityNotice');
@@ -1714,9 +1698,9 @@ function update() {
     if (Ftot < Wpod) {
       podNotice.innerHTML = `
         <div class="note nw" style="margin-top:6px;">
-          <strong>⚠ï¸ LEVİTASYON SAÄLANAMIYOR (KUVVET YETERSİZ: %${podLevRatio.toFixed(2)})</strong><br>
+          <strong>⚠️ LEVİTASYON SAĞLANAMIYOR (KUVVET YETERSİZ: %${podLevRatio.toFixed(2)})</strong><br>
           ${p.n} adet V1 prototip aktüatörünün ürettiği toplam elektromanyetik kaldırma kuvveti (${Ftot.toFixed(2)} N), ${p.m} kg kapsül ağırlığını (${Wpod.toFixed(0)} N) kaldırmaya yetmemektedir (Eksik: ${(Wpod - Ftot).toFixed(1)} N).<br>
-          <em>Açıklama: V1 aktüatörü laboratuvar ölçekli disk levitasyon prototipidir (m_lab=${(p.mLab * 1000).toFixed(0)} g). Tam ölçekli Hyperloop kapsülü için V2 konseptindeki süperiletken/hibrit yüksek akılı aktüatörler gereklidir. Sekme 3'teki ray hareketi, kinematik yörünge görselleştirmesidir.</em>
+          <em>V1 aktüatörü laboratuvar ölçekli disk levitasyon prototipidir (m_lab=${(p.mLab * 1000).toFixed(0)} g). Tam ölçekli Hyperloop kapsülü için V2 konseptindeki yüksek akılı aktüatörler gereklidir. Sekme 3'teki ray hareketi, kinematik yörünge gösterimidir.</em>
         </div>`;
     } else {
       podNotice.innerHTML = `
@@ -1729,16 +1713,16 @@ function update() {
   // Uyarı Kutuları
   const W = [];
   if (!el.isFeasible) {
-    W.push(['nw', `⚠ï¸ <strong>Bobin Paketleme Aşımı (%${(el.fillPack * 100).toFixed(0)}):</strong> Bu bobin mevcut 100 mmÂ² karkas penceresine fiziksel olarak sığmaz. FEA analizleri 'stranded' varsayımıyla hesaplanmıştır. Prototip imalatında karkas genişletilmeli veya tel inceltilmelidir.`]);
+    W.push(['nw', `⚠️ <strong>Bobin Paketleme Aşımı (%${(el.fillPack * 100).toFixed(0)}):</strong> Bu bobin mevcut 100 mm² karkas penceresine fiziksel olarak sığmaz. FEA analizleri 'stranded' varsayımıyla yapılmıştır. Prototip imalatında karkas genişletilmeli veya tel inceltilmelidir.`]);
   }
   if (el.J > 6.0) {
-    W.push(['na', `ğŸŒ¡ï¸ <strong>Termal Yoğunluk Uyarısı:</strong> Akım yoğunluğu J = ${el.J.toFixed(1)} A/mmÂ² (Doğal hava soğutması için önerilen sınır: ≤ 4â€“5 A/mmÂ²). Bobinde ${el.P.toFixed(1)} W Joule ısısı yayılmakta olup tahmini sıcaklık ~${el.T_coil.toFixed(0)} Â°C'ye ulaşır.`]);
+    W.push(['na', `🌡️ <strong>Termal Uyarı:</strong> Akım yoğunluğu ${el.J.toFixed(1)} A/mm² (Doğal hava soğutması için önerilen limit: ≤ 4–5 A/mm²). Bobinde ${el.P.toFixed(1)} W Joule ısısı yayılmakta olup tahmini sıcaklık ~${el.T_coil.toFixed(0)} °C'ye ulaşır.`]);
   }
   if (p.g !== 5.0) {
-    W.push(['ni', `ğŸ“ <strong>Hava Aralığı Ekstrapolasyonu (g = ${p.g.toFixed(1)} mm):</strong> ANSYS Maxwell V1 simülasyonu 5.0 mm hava aralığında çözülmüştür. Diğer aralıklar relüktans modeliyle hesaplanmaktadır.`]);
+    W.push(['ni', `📏 <strong>Hava Aralığı Ekstrapolasyonu (g = ${p.g.toFixed(1)} mm):</strong> ANSYS Maxwell V1 çözümü 5.0 mm'de doğrulanmıştır. Diğer aralıklar relüktans modeliyle hesaplanmaktadır.`]);
   }
   if (Ftot < Wpod) {
-    W.push(['nw', `ğŸš… <strong>Hyperloop Taşıma Kapasitesi:</strong> ${p.n} aktüatörün toplam kuvveti ${Ftot.toFixed(2)} N olup ${p.m} kg kapsül ağırlığını (${Wpod.toFixed(0)} N) kaldırmaz. Kapsül hareketi konsept kinematik simülasyondur.`]);
+    W.push(['nw', `🚅 <strong>Hyperloop Taşıma Kapasitesi:</strong> ${p.n} aktüatörün toplam kuvveti ${Ftot.toFixed(2)} N olup ${p.m} kg kapsül ağırlığını (${Wpod.toFixed(0)} N) kaldırmaz. Kapsül hareketi konsept kinematik simülasyondur.`]);
   }
   $('warns').innerHTML = W.map(w => `<div class="note ${w[0]}">${w[1]}</div>`).join('');
 
@@ -2116,11 +2100,11 @@ function drawCharts(p, F, Ieq, sim) {
   });
 }
 
-// Büyütülmüş Modal Görünümü ve 6 Grafik Türü (AÅAMA 5 & 8)
-let currentModalChartType = 'pid';
+// Büyütülmüş Modal Görünümü ve 6 Bilimsel Eğri
+activeModalType = 'pid';
 
 function openModal(chartType) {
-  currentModalChartType = chartType || 'pid';
+  activeModalType = chartType || 'pid';
   const modal = $('chartModal');
   const cv = $('modalCanvas');
   modal.style.display = 'flex';
@@ -2129,7 +2113,7 @@ function openModal(chartType) {
   ['pid', 'fg', 'fi', 'bi', 'err', 'pcu'].forEach(id => {
     const btn = $('mTab_' + id);
     if (btn) {
-      if (id === currentModalChartType) btn.classList.add('active');
+      if (id === activeModalType) btn.classList.add('active');
       else btn.classList.remove('active');
     }
   });
@@ -2139,9 +2123,9 @@ function openModal(chartType) {
   const Ieq = solveIeq(p);
   const sim = simulatePID(p, Ieq);
 
-  $('modalCsvBtn').onclick = () => exportCSV(currentModalChartType);
+  $('modalCsvBtn').onclick = () => exportCSV(activeModalType);
 
-  if (currentModalChartType === 'pid' && sim && sim.ts) {
+  if (activeModalType === 'pid' && sim && sim.ts) {
     $('modalTitle').textContent = 'PID Kapalı Çevrim Hava Aralığı Yanıtı z(t) ve Bobin Akımı I(t)';
     $('modalInfo').textContent = `Parametreler: Kp=${p.Kp}, Ki=${p.Ki}, Kd=${p.Kd} · Aşım: %${sim.os.toFixed(1)} · Yerleşme: ${(sim.tset * 1000).toFixed(0)} ms · Durum: ${sim.status.toUpperCase()}`;
     const zmax = Math.max(p.g + 1.5, ...sim.zs);
@@ -2157,8 +2141,8 @@ function openModal(chartType) {
       ],
       hl: [{ y: p.g, c: '#22c55e', t: `Hedef Hava Aralığı = ${p.g.toFixed(1)} mm` }]
     });
-  } else if (currentModalChartType === 'fg') {
-    $('modalTitle').textContent = 'Kaldırma Kuvveti - Hava Aralığı Karakteristiği F(g)';
+  } else if (activeModalType === 'fg') {
+    $('modalTitle').textContent = 'Manyetik Kaldırma Kuvveti - Hava Aralığı Karakteristiği F(g)';
     $('modalInfo').textContent = `Mevcut Çalışma Noktası: g = ${p.g.toFixed(1)} mm → F_em = ${fmtN(F_now)} (N=${p.N}, I=${p.I.toFixed(1)} A)`;
     const pts = [];
     for (let g = 1.5; g <= 15.0; g += 0.25) pts.push([g, forceModel(p.N, p.I, g, p.D)]);
@@ -2172,9 +2156,9 @@ function openModal(chartType) {
       hl: [{ y: p.mLab * GRAV, c: '#ef4444', t: `Laboratuvar Disk Ağırlığı (${(p.mLab * GRAV).toFixed(3)} N)` }],
       mk: [{ x: p.g, y: F_now, c: '#fbbf24', t: fmtN(F_now) }]
     });
-  } else if (currentModalChartType === 'fi') {
-    $('modalTitle').textContent = 'Kaldırma Kuvveti - Akım Karakteristiği F(I) ve Manyetik Doyma';
-    $('modalInfo').textContent = `Manyetik Doyma Modeli: F(I) = a·(NI)Â² / (1 + b·(NI)Â²) · FEA Referansları: 1.0 A (0.022 N) & 4.8 A (0.482 N)`;
+  } else if (activeModalType === 'fi') {
+    $('modalTitle').textContent = 'Kaldırma Kuvveti - Akım Karakteristiği F(I) ve Doyma Eğrisi';
+    $('modalInfo').textContent = `Doyma Uydurması: F = a·(NI)² / (1 + b·(NI)²) · FEA Referansları: 1.0 A (0.022 N) & 4.8 A (0.482 N)`;
     const pts = [];
     for (let i = 0; i <= 6.0; i += 0.1) pts.push([i, forceModel(p.N, i, p.g, p.D)]);
     const fMax = Math.max(...pts.map(q => q[1]), 0.6);
@@ -2190,8 +2174,8 @@ function openModal(chartType) {
         { x: p.I, y: F_now, c: '#ec4899', t: `Mevcut (${fmtN(F_now)})` }
       ]
     });
-  } else if (currentModalChartType === 'bi') {
-    $('modalTitle').textContent = 'Hava Aralığı Manyetik Akı Yoğunluğu B_gap(I)';
+  } else if (activeModalType === 'bi') {
+    $('modalTitle').textContent = 'Hava Aralığı Akı Yoğunluğu B_gap(I)';
     $('modalInfo').textContent = `Hava Aralığı: g = ${p.g.toFixed(1)} mm · ANSYS Maxwell Referansı: 4.8 A @ 5 mm → 0.185 T`;
     const pts = [];
     for (let i = 0; i <= 6.0; i += 0.1) pts.push([i, bGapModel(p.N, i, p.g, p.D) * 1000]);
@@ -2207,7 +2191,7 @@ function openModal(chartType) {
         { x: p.I, y: bGapModel(p.N, p.I, p.g, p.D) * 1000, c: '#ec4899', t: `Mevcut (${(bGapModel(p.N, p.I, p.g, p.D) * 1000).toFixed(1)} mT)` }
       ]
     });
-  } else if (currentModalChartType === 'err' && sim && sim.es) {
+  } else if (activeModalType === 'err' && sim && sim.es) {
     $('modalTitle').textContent = 'PID Konum Hata Yanıtı e(t) = z(t) - g_ref';
     $('modalInfo').textContent = `Başlangıç Hatası: +1.20 mm · Kalıcı Durum Hatası e_ss = ${sim.ess.toFixed(4)} mm`;
     const emax = Math.max(1.5, ...sim.es);
@@ -2220,9 +2204,9 @@ function openModal(chartType) {
       s: [{ p: sim.ts.map((t, i) => [t, sim.es[i]]), c: '#ef4444', lw: 2.8 }],
       hl: [{ y: 0, c: '#22c55e', t: 'Sıfır Hata Çizgisi (e = 0)' }]
     });
-  } else if (currentModalChartType === 'pcu') {
+  } else if (activeModalType === 'pcu') {
     $('modalTitle').textContent = 'Bobin Joule Kayıp Gücü P_cu(I) ve Isıl Yük';
-    $('modalInfo').textContent = `R_20Â°C = ${coilElectrical(p.N, p.I, p.D).R.toFixed(2)} Ω · J = ${coilElectrical(p.N, p.I, p.D).J.toFixed(1)} A/mmÂ² · T_coil â‰ˆ ${coilElectrical(p.N, p.I, p.D).T_coil.toFixed(1)} Â°C`;
+    $('modalInfo').textContent = `R_20°C = ${coilElectrical(p.N, p.I, p.D).R.toFixed(2)} Ω · J = ${coilElectrical(p.N, p.I, p.D).J.toFixed(1)} A/mm² · T_coil ≈ ${coilElectrical(p.N, p.I, p.D).T_coil.toFixed(1)} °C`;
     const pts = [];
     for (let i = 0; i <= 6.0; i += 0.1) {
       const el_i = coilElectrical(p.N, i, p.D);
@@ -2585,7 +2569,6 @@ $('inScale').addEventListener('change', () => { updateLegend(); computeFieldVisu
   setLayer(lyr);
 
   if (q.has('view')) camPreset(q.get('view'));
-  if (q.has('modal')) openModal(q.get('modal'));
   animate();
 })();
 </script>
