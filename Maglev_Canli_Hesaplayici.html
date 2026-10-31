@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elektromanyetik Levitasyon (Maglev) — 3D Canlı Simülasyon & Tasarım Stüdyosu</title>
-    <!-- Three.js 3D WebGL Library & OrbitControls -->
+    <title>TÜBİTAK 2209-B: PID Kontrollü Elektromanyetik Levitasyon & Hyperloop Dijital Prototip Platformu</title>
+    <!-- Three.js WebGL & OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
         :root {
-            --bg-dark: #0a0f1d;
-            --card-bg: #111827;
-            --card-border: #1f2937;
+            --bg-dark: #070b14;
+            --card-bg: #0f172a;
+            --card-border: #1e293b;
             --accent-blue: #38bdf8;
+            --accent-cyan: #06b6d4;
             --accent-green: #22c55e;
             --accent-amber: #f59e0b;
             --accent-rose: #f43f5e;
+            --accent-purple: #a855f7;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
         }
@@ -24,497 +26,813 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg-dark);
             color: var(--text-main);
-            padding: 24px;
-            line-height: 1.6;
+            padding: 16px;
+            line-height: 1.5;
+            overflow-x: hidden;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
+        .container { max-width: 1560px; margin: 0 auto; }
+        
+        /* HEADER */
         header {
-            text-align: center;
-            padding: 26px 20px;
-            background: linear-gradient(135deg, #111827 0%, #1e1b4b 100%);
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             border: 1px solid var(--card-border);
             border-radius: 16px;
-            margin-bottom: 24px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            margin-bottom: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        h1 { font-size: 2.1rem; color: #fff; margin-bottom: 6px; }
-        .subtitle { color: var(--accent-blue); font-size: 1.05rem; margin-bottom: 12px; }
-        .meta-chips { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        .chip {
-            background: #1f2937;
-            color: #e2e8f0;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            border: 1px solid #374151;
+        .header-title h1 { font-size: 1.6rem; color: #fff; font-weight: 800; letter-spacing: -0.5px; }
+        .header-title .sub { color: var(--accent-blue); font-size: 0.95rem; font-weight: 500; }
+        .header-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+        .badge {
+            background: #1e293b;
+            color: #cbd5e1;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid #334155;
         }
-        .main-grid {
+        .badge-tubitak { background: #004b87; color: #fff; border-color: #0284c7; }
+
+        /* MODE TABS BAR */
+        .stage-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            background: #0b1120;
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+        }
+        .stage-tab {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .stage-tab:hover { background: #1e293b; color: #fff; }
+        .stage-tab.active {
+            background: #1e293b;
+            color: #fff;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+
+        /* MAIN LAYOUT */
+        .main-layout {
             display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 24px;
-            margin-bottom: 24px;
+            grid-template-columns: 360px 1fr 340px;
+            gap: 18px;
         }
-        @media (max-width: 992px) { .main-grid { grid-template-columns: 1fr; } }
-        .card {
+        @media (max-width: 1280px) { .main-layout { grid-template-columns: 340px 1fr; } .side-panel-right { grid-column: span 2; } }
+        @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } .side-panel-right { grid-column: span 1; } }
+
+        .panel {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 14px;
-            padding: 22px;
+            padding: 18px;
         }
-        .card h2 {
-            font-size: 1.2rem;
-            margin-bottom: 16px;
+        .panel h2 {
+            font-size: 1.05rem;
             color: var(--accent-blue);
-            border-bottom: 1px solid var(--card-border);
             padding-bottom: 8px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .input-group { margin-bottom: 14px; }
-        .input-group label {
-            display: block;
-            font-size: 0.85rem;
+
+        /* CONTROLS */
+        .control-group { margin-bottom: 12px; }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
             color: var(--text-muted);
             margin-bottom: 4px;
         }
-        .input-group input {
+        .control-group input[type="number"], .control-group select {
             width: 100%;
-            padding: 9px 12px;
-            background: #0f172a;
+            padding: 8px 10px;
+            background: #070b14;
             border: 1px solid #334155;
-            border-radius: 8px;
+            border-radius: 6px;
             color: #fff;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             outline: none;
-            transition: border-color 0.2s;
         }
-        .input-group input:focus { border-color: var(--accent-blue); }
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
-        .kpi-box {
-            background: #0b1120;
-            border-radius: 10px;
-            padding: 12px;
-            border-left: 3px solid var(--accent-blue);
-        }
-        .kpi-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
-        .kpi-val { font-size: 1.3rem; font-weight: bold; color: var(--accent-green); margin-top: 4px; }
-        
-        /* 3D Viewport Styles */
-        #viewport3d {
+        .control-group input[type="range"] {
             width: 100%;
-            height: 480px;
-            background: #050811;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            position: relative;
-            overflow: hidden;
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+            accent-color: var(--accent-blue);
         }
-        .viewport-overlay {
+
+        /* 3D VIEWPORT */
+        .viewport-wrapper {
+            position: relative;
+            background: #050811;
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 560px;
+        }
+        #canvas3d { width: 100%; height: 560px; display: block; }
+        .viewport-hud {
             position: absolute;
             top: 14px;
-            left: 16px;
+            left: 14px;
             pointer-events: none;
             z-index: 10;
         }
-        .viewport-title {
-            font-size: 0.9rem;
+        .hud-title {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            font-size: 0.85rem;
             font-weight: 700;
-            color: #38bdf8;
+            color: var(--accent-blue);
+            display: inline-block;
+        }
+        .hud-metrics {
+            margin-top: 6px;
             background: rgba(15, 23, 42, 0.75);
             padding: 4px 10px;
             border-radius: 6px;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            display: inline-block;
-        }
-        .viewport-hint {
             font-size: 0.75rem;
-            color: #94a3b8;
-            margin-top: 4px;
-            background: rgba(15, 23, 42, 0.6);
-            padding: 2px 8px;
-            border-radius: 4px;
+            color: var(--text-muted);
             display: inline-block;
         }
-        .viewport-controls {
+        .viewport-actions {
             position: absolute;
             bottom: 14px;
-            right: 16px;
+            right: 14px;
             z-index: 10;
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
-        .btn-view {
-            background: #1e293b;
+        .btn-action {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(8px);
             color: #e2e8f0;
             border: 1px solid #475569;
             padding: 6px 12px;
             border-radius: 6px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             cursor: pointer;
+            font-weight: 600;
             transition: all 0.2s;
         }
-        .btn-view:hover { background: #334155; color: #fff; border-color: #38bdf8; }
-        .status-bar {
-            margin-top: 12px;
-            padding: 10px 16px;
+        .btn-action:hover { background: #334155; border-color: var(--accent-blue); color: #fff; }
+        .btn-run { background: #0284c7; border-color: #38bdf8; color: #fff; }
+
+        /* KPI METRICS CARDS */
+        .metric-card {
+            background: #090e1a;
             border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            text-align: center;
+            padding: 10px 12px;
+            border-left: 3px solid var(--accent-blue);
+            margin-bottom: 10px;
         }
-        .status-ok { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid #22c55e; }
-        .status-warn { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid #f43f5e; }
-        footer {
-            text-align: center;
-            padding: 16px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            border-top: 1px solid var(--card-border);
+        .metric-lbl { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; }
+        .metric-val { font-size: 1.15rem; font-weight: 800; color: #fff; margin-top: 2px; }
+        .metric-sub { font-size: 0.7rem; color: #64748b; }
+
+        /* VERSION COMPARISON TABLE */
+        .comp-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            margin-top: 8px;
         }
+        .comp-table th, .comp-table td {
+            padding: 6px 8px;
+            border: 1px solid #1e293b;
+            text-align: left;
+        }
+        .comp-table th { background: #0b1120; color: var(--accent-blue); }
+        .comp-table tr:nth-child(even) { background: #090e1a; }
+        .status-tag {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.68rem;
+            font-weight: 700;
+        }
+        .tag-verified { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .tag-concept { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+
+        /* STATUS CALLOUT */
+        .callout {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+        .callout-info { background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); color: #7dd3fc; }
+        .callout-warn { background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.25); color: #fda4af; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- HEADER -->
     <header>
-        <h1>⚡ Elektromanyetik Levitasyon (Maglev) 3D Tasarım Stüdyosu</h1>
-        <div class="subtitle">Ansys Maxwell 3D Doğrulamalı Dinamik Levitasyon ve Manyetik Kuvvet Simülatörü</div>
-        <div class="meta-chips">
-            <span class="chip">🏛️ Karadeniz Teknik Üniversitesi (KTÜ)</span>
-            <span class="chip">🎯 TÜBİTAK 2209-B Projesi</span>
-            <span class="chip">🌐 WebGL & Three.js 3D Engine</span>
-            <span class="chip">👨‍💻 Muhammet Raşit Taflan</span>
+        <div class="header-title">
+            <h1>⚡ PID Kontrollü Elektromanyetik Levitasyon & Hyperloop Entegrasyonu</h1>
+            <div class="sub">TÜBİTAK 2209-B Sanayiye Yönelik Lisans Araştırma Projesi — Karadeniz Teknik Üniversitesi (KTÜ)</div>
+        </div>
+        <div class="header-badges">
+            <span class="badge badge-tubitak">TÜBİTAK 2209-B</span>
+            <span class="badge">Ansys Maxwell FEA</span>
+            <span class="badge">MATLAB / Simulink</span>
+            <span class="badge">Yürütücü: M. Raşit Taflan</span>
         </div>
     </header>
 
-    <div class="main-grid">
-        <!-- SOL PANEL: PARAMETRİK GİRDİLER -->
-        <div class="card">
-            <h2>⚙️ Manyetik ve Geometrik Girdiler</h2>
-            
-            <div class="input-group">
-                <label for="turns">Bobin Sarım Sayısı (N - Tur):</label>
-                <input type="number" id="turns" value="650" min="50" max="3000" step="10" oninput="updateSimulation()">
-            </div>
-
-            <div class="input-group">
-                <label for="current">Bobin Uyarım Akımı (I - Amper):</label>
-                <input type="number" id="current" value="4.8" min="0.1" max="15.0" step="0.1" oninput="updateSimulation()">
-            </div>
-
-            <div class="input-group">
-                <label for="airgap">Hava Aralığı (g - mm):</label>
-                <input type="number" id="airgap" value="5.0" min="1.0" max="25.0" step="0.5" oninput="updateSimulation()">
-            </div>
-
-            <div class="input-group">
-                <label for="poleArea">Kutup Yüzey Alanı (A - mm²):</label>
-                <input type="number" id="poleArea" value="1800" min="200" max="8000" step="50" oninput="updateSimulation()">
-            </div>
-
-            <div class="input-group">
-                <label for="targetMass">Hedef Kütle (m - kg):</label>
-                <input type="number" id="targetMass" value="12.0" min="0.5" max="50.0" step="0.5" oninput="updateSimulation()">
-            </div>
-
-            <div class="input-group">
-                <label for="relPerm">Nüve Bağıl Geçirgenliği (&mu;r):</label>
-                <input type="number" id="relPerm" value="3000" min="100" max="10000" step="100" oninput="updateSimulation()">
-            </div>
-
-            <div style="margin-top: 16px; font-size: 0.8rem; color: #94a3b8; background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #1e293b;">
-                💡 <strong>İpucu:</strong> Girdileri değiştirdikçe sağdaki 3D modelde elektromıknatıs akı çizgileri, hava aralığı mesafesi ve armature plakası gerçek zamanlı tepki verir.
-            </div>
-        </div>
-
-        <!-- SAĞ PANEL: CANLI 3D VIEWPORT VE KPI METRİKLERİ -->
-        <div class="card" style="padding: 16px;">
-            <div class="kpi-grid">
-                <div class="kpi-box">
-                    <div class="kpi-title">Kaldırma Kuvveti</div>
-                    <div class="kpi-val" id="resForce">142.8 N</div>
-                </div>
-                <div class="kpi-box" style="border-left-color: var(--accent-amber);">
-                    <div class="kpi-title">Yerçekimi Yükü</div>
-                    <div class="kpi-val" id="resWeight" style="color: var(--accent-amber);">117.7 N</div>
-                </div>
-                <div class="kpi-box" style="border-left-color: var(--accent-rose);">
-                    <div class="kpi-title">Hava Akı Yoğunluğu</div>
-                    <div class="kpi-val" id="resFlux" style="color: var(--accent-rose);">1.42 T</div>
-                </div>
-                <div class="kpi-box" style="border-left-color: #a855f7;">
-                    <div class="kpi-title">Manyetomotor Kuvvet</div>
-                    <div class="kpi-val" id="resMMF" style="color: #a855f7;">3120 A·t</div>
-                </div>
-            </div>
-
-            <!-- THREE.JS 3D CANVAS VIEWPORT -->
-            <div id="viewport3d">
-                <div class="viewport-overlay">
-                    <div class="viewport-title">🛰️ 3D INTERACTIVE LEVITATION STAGE</div><br/>
-                    <div class="viewport-hint">🖱️ Fare ile Döndür | Tekerlek ile Yakınlaş | Sağ Tık ile Kaydır</div>
-                </div>
-
-                <div class="viewport-controls">
-                    <button class="btn-view" onclick="resetCamera()">Reset Görünüm</button>
-                    <button class="btn-view" onclick="setTopView()">Üstten Bakış</button>
-                    <button class="btn-view" onclick="setSideView()">Yandan Bakış</button>
-                </div>
-            </div>
-
-            <div id="statusAlert" class="status-bar status-ok">
-                ✅ LEVİTASYON BAŞARILI: Manyetik kaldırma kuvveti (142.8 N) hedef kütle yükünü (117.7 N) kararlı şekilde taşımaktadır.
-            </div>
-        </div>
+    <!-- 3D SAHNE MODU SEÇİCİ SEKMELER -->
+    <div class="stage-tabs">
+        <button class="stage-tab active" id="tab1" onclick="switchStage(1)">
+            🔬 1. Electromagnet Laboratory (V1 Silindirik Nüve)
+        </button>
+        <button class="stage-tab" id="tab2" onclick="switchStage(2)">
+            🚅 2. Hyperloop Integration (Kapsül Altı Dağılımı)
+        </button>
+        <button class="stage-tab" id="tab3" onclick="switchStage(3)">
+            🚀 3. Full System Simulation (Ray & Hareket Dinamiği)
+        </button>
+        <button class="stage-tab" id="tab4" onclick="switchStage(4)">
+            ⚖️ 4. Version Comparison (V1 vs V2 Dashboard)
+        </button>
     </div>
 
-    <footer>
-        Elektromanyetik Levitasyon (Maglev) Ansys Maxwell FEA & 3D WebGL Simülasyon Paketi &copy; 2026 | Muhammet Raşit Taflan | Karadeniz Teknik Üniversitesi
-    </footer>
+    <!-- MAIN GRID LAYOUT -->
+    <div class="main-layout">
+        
+        <!-- SOL PANEL: GİRDİLER VE PARAMETRİK AYARLAR -->
+        <div class="panel">
+            <h2>⚙️ Aktif Tasarım Parametreleri</h2>
+
+            <div class="control-group">
+                <label>Aktif Tasarım Versiyonu: <span id="vLabel" style="color:var(--accent-blue);font-weight:bold;">Version 1 (V1)</span></label>
+                <select id="versionSelect" onchange="changeVersion()">
+                    <option value="v1" selected>Version 1: Silindirik Nüve (Doğrulanmış V1)</option>
+                    <option value="v2">Version 2: Yeni Nüve Geometrisi (Konsept Çalışması)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Nüve Malzemesi: <span style="color:#22c55e;">Steel 1008 (V1 Doğrulanmış)</span></label>
+                <input type="text" value="Steel 1008 (Doyum: ~1.85 T)" disabled style="background:#090e1a;color:#94a3b8;border:1px solid #1e293b;padding:6px;width:100%;border-radius:4px;font-size:0.8rem;">
+            </div>
+
+            <div class="control-group">
+                <label>Bobin Sarım Sayısı (N): <span id="valN" style="color:var(--accent-blue);font-weight:bold;">500 Tur</span></label>
+                <input type="range" id="inputN" min="100" max="1500" value="500" step="50" oninput="recalc()">
+            </div>
+
+            <div class="control-group">
+                <label>Uyarım Akımı (I): <span id="valI" style="color:var(--accent-amber);font-weight:bold;">4.80 A</span></label>
+                <input type="range" id="inputI" min="0.5" max="10.0" value="4.8" step="0.1" oninput="recalc()">
+            </div>
+
+            <div class="control-group">
+                <label>Hava Aralığı (g): <span id="valG" style="color:var(--accent-rose);font-weight:bold;">5.0 mm</span></label>
+                <input type="range" id="inputG" min="1.0" max="15.0" value="5.0" step="0.5" oninput="recalc()">
+            </div>
+
+            <div class="control-group">
+                <label>Silindirik Nüve Çapı (D): <span id="valD">30.0 mm</span></label>
+                <input type="range" id="inputD" min="15" max="80" value="30" step="1" oninput="recalc()">
+            </div>
+
+            <div class="control-group">
+                <label>Hyperloop Elektromıknatıs Sayısı: <span id="valMagCount">8 Adet</span></label>
+                <select id="inputMagCount" onchange="recalc()">
+                    <option value="4">4 Elektromıknatıs (2 Ön / 2 Arka)</option>
+                    <option value="8" selected>8 Elektromıknatıs (4 Sol / 4 Sağ Ray)</option>
+                    <option value="12">12 Elektromıknatıs (Yüksek Taşıma Kapasitesi)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Kapsül Boş Ağırlığı (Şasi + Yük): <span id="valPodMass">120 kg</span></label>
+                <input type="range" id="inputPodMass" min="20" max="350" value="120" step="5" oninput="recalc()">
+            </div>
+
+            <div class="callout callout-info" id="v1Note">
+                📌 <strong>V1 Bilimsel Gerçeği:</strong> V1 tekil silindirik prototip laboratuvar koşullarında <strong>0.482 N</strong> kuvvet üretmektedir. Bu değer 120 kg'lık Hyperloop kapsülünün doğrudan kaldırılması için değil, <strong>PID hava aralığı kontrol algoritmasının ve manyetik çekim dinamiğinin doğrulanması</strong> amacıyla tasarlanmıştır.
+            </div>
+        </div>
+
+        <!-- ORTA PANEL: THREE.JS 3D VIEWPORT -->
+        <div class="viewport-wrapper">
+            <div id="canvas3d"></div>
+
+            <div class="viewport-hud">
+                <div class="hud-title" id="hudStageTitle">🔬 ELECTROMAGNET LABORATORY — V1 SILINDIRIK NUVE</div><br/>
+                <div class="hud-metrics" id="hudMetrics">Akım: 4.8A | Sarım: 500T | Hava Aralığı: 5.0mm | FEA Akı: ~185 mT</div>
+            </div>
+
+            <div class="viewport-actions">
+                <button class="btn-action" onclick="resetCam()">Reset Bakış</button>
+                <button class="btn-action" id="btnAnim" onclick="toggleAnimation()">▶ Ray Simülasyonu</button>
+                <button class="btn-action" onclick="toggleCoilCut()">Kesit Görünümü</button>
+            </div>
+        </div>
+
+        <!-- SAĞ PANEL: HESAPLANAN MÜHENDİSLİK METRİKLERİ VE KARŞILAŞTIRMA -->
+        <div class="panel side-panel-right">
+            <h2>📊 Kuvvet, Manyetik ve Sistem Metrikleri</h2>
+
+            <div class="metric-card">
+                <div class="metric-lbl">Tekil Elektromıknatıs Kuvveti (F_em)</div>
+                <div class="metric-val" id="metricFem" style="color:var(--accent-blue);">0.482 N</div>
+                <div class="metric-sub">ANSYS Maxwell V1 Doğrulaması: 0.48233 N</div>
+            </div>
+
+            <div class="metric-card" style="border-left-color:var(--accent-amber);">
+                <div class="metric-lbl">Ortalama Manyetik Akı Yoğunluğu (B)</div>
+                <div class="metric-val" id="metricB" style="color:var(--accent-amber);">185.0 mT</div>
+                <div class="metric-sub">Hava aralığı merkez akısı (Steel 1008 doyumu: 1.85 T)</div>
+            </div>
+
+            <div class="metric-card" style="border-left-color:var(--accent-rose);">
+                <div class="metric-lbl">Hyperloop Kapsül Ağırlığı (F_g)</div>
+                <div class="metric-val" id="metricFg" style="color:var(--accent-rose);">1177.2 N</div>
+                <div class="metric-sub">m_total = 120 kg (F_g = m · g)</div>
+            </div>
+
+            <div class="metric-card" style="border-left-color:var(--accent-purple);">
+                <div class="metric-lbl">Toplam Kaldırma Kapasitesi (Σ F_em,i)</div>
+                <div class="metric-val" id="metricFtotal" style="color:var(--accent-purple);">3.86 N</div>
+                <div class="metric-sub" id="metricSubTotal">8 Adet V1 Silindirik Aktüatör Toplamı</div>
+            </div>
+
+            <!-- VERSİYON TABLOSU -->
+            <h2 style="margin-top:14px;">⚖️ Tasarım Versiyonları Karşılaştırması</h2>
+            <table class="comp-table">
+                <thead>
+                    <tr>
+                        <th>Parametre</th>
+                        <th>V1 (Doğrulanmış)</th>
+                        <th>V2 (Planlanan)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Nüve Tipi</strong></td>
+                        <td>Silindirik (Cylindrical)</td>
+                        <td>E / U / C Biçimli (Gelişmiş)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sarım / Akım</strong></td>
+                        <td>500 Tur / 4.8 A</td>
+                        <td>Belirlenecek (TBD)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hava Aralığı</strong></td>
+                        <td>5.0 mm</td>
+                        <td>3.0 - 5.0 mm</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tekil Kuvvet</strong></td>
+                        <td><strong>0.4823 N</strong></td>
+                        <td>≥ 130 N (Hedef)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Doğrulama Durumu</strong></td>
+                        <td><span class="status-tag tag-verified">Doğrulandı</span></td>
+                        <td><span class="status-tag tag-concept">Konsept / TBD</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout callout-warn" id="scaleWarning" style="margin-top:12px;">
+                ⚠️ <strong>Ölçek Uyarısı:</strong> V1 prototipi ile 120 kg kapsül ağırlığı dengelenemez. V1'in amacı <strong>kapalı çevrim PID kontrol mantığını, akım-kuvvet ilişkisini ve sensör geri beslemesini</strong> küçük ölçekte kanıtlamaktır. Kapsül kaldırma için V2 yüksek kuvvetli aktüatör mimarisine geçilecektir.
+            </div>
+        </div>
+
+    </div>
 </div>
 
 <script>
-    // --- THREE.JS 3D SAHNE KURULUMU ---
-    const container = document.getElementById('viewport3d');
+    // --- THREE.JS 3D PLATFORM MOTORU ---
+    const viewport = document.getElementById('canvas3d');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x060913);
-    scene.fog = new THREE.FogExp2(0x060913, 0.025);
+    scene.fog = new THREE.FogExp2(0x060913, 0.015);
 
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-    camera.position.set(0, 5, 14);
+    const camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 0.1, 500);
+    camera.position.set(0, 6, 14);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(viewport.clientWidth, viewport.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    container.appendChild(renderer.domElement);
+    viewport.appendChild(renderer.domElement);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.maxPolarAngle = Math.PI / 2 + 0.1;
 
     // --- IŞIKLANDIRMA ---
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
+    const ambLight = new THREE.AmbientLight(0xffffff, 0.55);
+    scene.add(ambLight);
 
-    const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
-    dirLight.position.set(8, 12, 10);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
+    const sunLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
+    sunLight.position.set(15, 25, 20);
+    sunLight.castShadow = true;
+    scene.add(sunLight);
 
-    const spotLight = new THREE.SpotLight(0xf59e0b, 1.5);
-    spotLight.position.set(-8, 10, -5);
-    scene.add(spotLight);
+    const accentLight = new THREE.PointLight(0xf59e0b, 1.2, 50);
+    accentLight.position.set(-10, 10, -10);
+    scene.add(accentLight);
 
-    // Grid Floor
-    const gridHelper = new THREE.GridHelper(24, 24, 0x334155, 0x1e293b);
-    gridHelper.position.y = -3.5;
-    scene.add(gridHelper);
+    // Zemin Grid
+    const floorGrid = new THREE.GridHelper(80, 80, 0x334155, 0x111827);
+    floorGrid.position.y = -3.0;
+    scene.add(floorGrid);
 
-    // --- ELEKTROMIKNATIS GRUBU (STATOR) ---
-    const magnetGroup = new THREE.Group();
-    magnetGroup.position.set(0, 2.2, 0);
+    // --- 1. SAHNE: V1 SİLİNDİRİK ELEKTROMIKNATIS LABORATUVARI (STAGE 1) ---
+    const stage1Group = new THREE.Group();
+    scene.add(stage1Group);
 
-    // E/U Core Nüve (Çelik Gövde)
-    const coreMaterial = new THREE.MeshStandardMaterial({
-        color: 0x334155,
-        roughness: 0.3,
-        metalness: 0.8
+    // Malzemeler
+    const steel1008Mat = new THREE.MeshStandardMaterial({
+        color: 0x475569,
+        roughness: 0.35,
+        metalness: 0.85
     });
-
-    // Ana Arka Boyunduruk
-    const backYokeGeo = new THREE.BoxGeometry(6.4, 1.2, 2.4);
-    const backYoke = new THREE.Mesh(backYokeGeo, coreMaterial);
-    backYoke.castShadow = true;
-    magnetGroup.add(backYoke);
-
-    // Sol Kutup
-    const poleGeo = new THREE.BoxGeometry(1.4, 2.2, 2.4);
-    const leftPole = new THREE.Mesh(poleGeo, coreMaterial);
-    leftPole.position.set(-2.2, -1.5, 0);
-    leftPole.castShadow = true;
-    magnetGroup.add(leftPole);
-
-    // Sağ Kutup
-    const rightPole = new THREE.Mesh(poleGeo, coreMaterial);
-    rightPole.position.set(2.2, -1.5, 0);
-    rightPole.castShadow = true;
-    magnetGroup.add(rightPole);
-
-    // Bakır Bobinler (Copper Winding)
-    const copperMaterial = new THREE.MeshStandardMaterial({
+    const copperCoilMat = new THREE.MeshStandardMaterial({
         color: 0xd97706,
         roughness: 0.4,
         metalness: 0.9,
         emissive: 0x78350f,
         emissiveIntensity: 0.2
     });
-
-    const coilGeo = new THREE.BoxGeometry(1.8, 1.4, 2.8);
-    const leftCoil = new THREE.Mesh(coilGeo, copperMaterial);
-    leftCoil.position.set(-2.2, -1.3, 0);
-    magnetGroup.add(leftCoil);
-
-    const rightCoil = new THREE.Mesh(coilGeo, copperMaterial);
-    rightCoil.position.set(2.2, -1.3, 0);
-    magnetGroup.add(rightCoil);
-
-    scene.add(magnetGroup);
-
-    // --- LEVITASYON HEDEFİ (ARMATURE - ASILI PLAKA) ---
-    const armatureGeo = new THREE.BoxGeometry(6.8, 0.8, 2.8);
-    const armatureMat = new THREE.MeshStandardMaterial({
+    const targetSteelMat = new THREE.MeshStandardMaterial({
         color: 0x64748b,
-        roughness: 0.2,
-        metalness: 0.9,
-        emissive: 0x1e293b,
-        emissiveIntensity: 0.1
+        roughness: 0.3,
+        metalness: 0.85
     });
-    const armatureMesh = new THREE.Mesh(armatureGeo, armatureMat);
-    armatureMesh.castShadow = true;
-    armatureMesh.receiveShadow = true;
-    scene.add(armatureMesh);
 
-    // Manyetik Akı Çizgileri Eğrileri (Flux Lines)
-    const fluxLinesGroup = new THREE.Group();
-    scene.add(fluxLinesGroup);
+    // Silindirik Çekirdek (Cylindrical Core) - Çap 30mm, Yükseklik 60mm temsili ölçek
+    const cylCoreGeo = new THREE.CylinderGeometry(1.2, 1.2, 4.0, 32);
+    const cylCoreMesh = new THREE.Mesh(cylCoreGeo, steel1008Mat);
+    cylCoreMesh.position.set(0, 1.5, 0);
+    cylCoreMesh.castShadow = true;
+    stage1Group.add(cylCoreMesh);
 
-    function createFluxCurves(colorHex, intensity) {
-        fluxLinesGroup.clear();
-        const fluxMat = new THREE.LineBasicMaterial({
-            color: colorHex,
+    // Silindirik Bakır Bobin Sargısı (Coil Wound around core)
+    const cylCoilGeo = new THREE.CylinderGeometry(1.8, 1.8, 2.8, 32, 1, true);
+    const cylCoilMesh = new THREE.Mesh(cylCoilGeo, copperCoilMat);
+    cylCoilMesh.position.set(0, 1.5, 0);
+    stage1Group.add(cylCoilMesh);
+
+    // Bobin Üst ve Alt Flanş Kapakları
+    const flangeGeo = new THREE.CylinderGeometry(1.85, 1.85, 0.2, 32);
+    const topFlange = new THREE.Mesh(flangeGeo, steel1008Mat);
+    topFlange.position.set(0, 2.9, 0);
+    stage1Group.add(topFlange);
+    const botFlange = new THREE.Mesh(flangeGeo, steel1008Mat);
+    botFlange.position.set(0, 0.1, 0);
+    stage1Group.add(botFlange);
+
+    // Ferromanyetik Hedef Plaka / Disk (Hava Aralığının Altında Asılı Duran)
+    const targetPlateGeo = new THREE.CylinderGeometry(2.4, 2.4, 0.5, 32);
+    const targetPlateMesh = new THREE.Mesh(targetPlateGeo, targetSteelMat);
+    targetPlateMesh.position.set(0, -1.2, 0);
+    targetPlateMesh.castShadow = true;
+    stage1Group.add(targetPlateMesh);
+
+    // Silindirik Manyetik Akı Çizgileri (Toroidal / Dipole Flux Curves)
+    const fluxLines = new THREE.Group();
+    stage1Group.add(fluxLines);
+
+    function buildCylindricalFluxLines(intensity) {
+        fluxLines.clear();
+        const mat = new THREE.LineBasicMaterial({
+            color: 0x38bdf8,
             transparent: true,
-            opacity: Math.min(Math.max(intensity, 0.25), 0.95),
-            linewidth: 2
+            opacity: Math.min(Math.max(intensity, 0.25), 0.95)
         });
 
-        // Sol kutup akı çizgileri
-        for (let i = -1; i <= 1; i += 0.5) {
+        for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 6) {
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
             const curve = new THREE.QuadraticBezierCurve3(
-                new THREE.Vector3(-2.2, magnetGroup.position.y - 2.6, i),
-                new THREE.Vector3(-2.4, (magnetGroup.position.y - 2.6 + armatureMesh.position.y + 0.4) / 2, i),
-                new THREE.Vector3(-2.2, armatureMesh.position.y + 0.4, i)
+                new THREE.Vector3(1.2 * cos, -0.5, 1.2 * sin),
+                new THREE.Vector3(2.5 * cos, (targetPlateMesh.position.y - 0.5) / 2, 2.5 * sin),
+                new THREE.Vector3(1.8 * cos, targetPlateMesh.position.y + 0.25, 1.8 * sin)
             );
-            const points = curve.getPoints(12);
-            const geo = new THREE.BufferGeometry().setFromPoints(points);
-            fluxLinesGroup.add(new THREE.Line(geo, fluxMat));
-        }
-
-        // Sağ kutup akı çizgileri
-        for (let i = -1; i <= 1; i += 0.5) {
-            const curve = new THREE.QuadraticBezierCurve3(
-                new THREE.Vector3(2.2, magnetGroup.position.y - 2.6, i),
-                new THREE.Vector3(2.4, (magnetGroup.position.y - 2.6 + armatureMesh.position.y + 0.4) / 2, i),
-                new THREE.Vector3(2.2, armatureMesh.position.y + 0.4, i)
-            );
-            const points = curve.getPoints(12);
-            const geo = new THREE.BufferGeometry().setFromPoints(points);
-            fluxLinesGroup.add(new THREE.Line(geo, fluxMat));
+            const pts = curve.getPoints(14);
+            const g = new THREE.BufferGeometry().setFromPoints(pts);
+            fluxLines.add(new THREE.Line(g, mat));
         }
     }
 
-    // --- HESAPLAMA & DİNAMİK 3D GÜNCELLEME MOTORU ---
-    let targetArmatureY = -0.5;
+    // --- 2. VE 3. SAHNE: HYPERLOOP KAPSÜLÜ VE RAY SİSTEMİ (STAGE 2 & 3) ---
+    const hyperloopGroup = new THREE.Group();
+    scene.add(hyperloopGroup);
+    hyperloopGroup.visible = false;
 
-    function updateSimulation() {
-        const N = parseFloat(document.getElementById('turns').value) || 0;
-        const I = parseFloat(document.getElementById('current').value) || 0;
-        const g_mm = parseFloat(document.getElementById('airgap').value) || 1;
-        const A_mm2 = parseFloat(document.getElementById('poleArea').value) || 100;
-        const m = parseFloat(document.getElementById('targetMass').value) || 0;
-        const mu_r = parseFloat(document.getElementById('relPerm').value) || 2000;
+    // Ray Geometrisi (İkili Kılavuz Yol - Guide Way)
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.3, metalness: 0.8 });
+    const trackLength = 120;
+    const railGeo = new THREE.BoxGeometry(0.8, 0.6, trackLength);
 
-        const g = g_mm * 1e-3;
-        const A = A_mm2 * 1e-6;
-        const mu_0 = 4 * Math.PI * 1e-7;
+    const leftRail = new THREE.Mesh(railGeo, railMat);
+    leftRail.position.set(-3.2, -1.8, 0);
+    leftRail.receiveShadow = true;
+    hyperloopGroup.add(leftRail);
 
-        const mmf = N * I;
-        const R_air = (2 * g) / (mu_0 * A);
-        const R_core = 0.22 / (mu_0 * mu_r * A);
-        const R_total = R_air + R_core;
+    const rightRail = new THREE.Mesh(railGeo, railMat);
+    rightRail.position.set(3.2, -1.8, 0);
+    rightRail.receiveShadow = true;
+    hyperloopGroup.add(rightRail);
 
-        const Phi = mmf / R_total;
-        const B = Math.min(Phi / A, 1.95);
+    // Ray Traversleri (Cross Ties)
+    const tieGeo = new THREE.BoxGeometry(7.4, 0.3, 1.2);
+    for (let z = -trackLength / 2; z <= trackLength / 2; z += 5) {
+        const tie = new THREE.Mesh(tieGeo, railMat);
+        tie.position.set(0, -2.1, z);
+        hyperloopGroup.add(tie);
+    }
 
-        // Manyetik Kuvvet (Maxwell Gerilme Tensörü Hesabı: F = B^2 * A / mu_0)
-        const F_mag = (B * B * A) / mu_0;
-        const W = m * 9.81;
+    // Hyperloop Kapsül Grubu
+    const podGroup = new THREE.Group();
+    podGroup.position.set(0, -0.6, 0);
+    hyperloopGroup.add(podGroup);
 
-        // Sonuçları Ekrana Yazdır
-        document.getElementById('resForce').innerText = F_mag.toFixed(1) + " N";
-        document.getElementById('resWeight').innerText = W.toFixed(1) + " N";
-        document.getElementById('resFlux').innerText = B.toFixed(2) + " T";
-        document.getElementById('resMMF').innerText = Math.round(mmf) + " A·t";
+    // Kapsül Şasisi (Alt Taşıyıcı)
+    const chassisGeo = new THREE.BoxGeometry(5.8, 0.6, 14);
+    const chassisMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.7 });
+    const chassis = new THREE.Mesh(chassisGeo, chassisMat);
+    chassis.position.set(0, 0, 0);
+    chassis.castShadow = true;
+    podGroup.add(chassis);
 
-        const alertBox = document.getElementById('statusAlert');
-        if (F_mag >= W) {
-            alertBox.className = "status-bar status-ok";
-            alertBox.innerHTML = `✅ LEVİTASYON BAŞARILI: Manyetik kaldırma kuvveti (${F_mag.toFixed(1)} N), kütle yükünü (${W.toFixed(1)} N) kararlı şekilde havada tutmaktadır.`;
+    // Kapsül Aerodinamik Gövdesi (Aerodynamic Shell)
+    const shellGeo = new THREE.CylinderGeometry(2.6, 2.8, 12, 32);
+    shellGeo.rotateX(Math.PI / 2);
+    const shellMat = new THREE.MeshStandardMaterial({
+        color: 0x0284c7,
+        roughness: 0.2,
+        metalness: 0.6,
+        transparent: true,
+        opacity: 0.88
+    });
+    const shell = new THREE.Mesh(shellGeo, shellMat);
+    shell.position.set(0, 1.8, -0.5);
+    shell.castShadow = true;
+    podGroup.add(shell);
+
+    // Burun Konisi (Aerodynamic Nose Cone)
+    const noseGeo = new THREE.ConeGeometry(2.6, 3.5, 32);
+    noseGeo.rotateX(-Math.PI / 2);
+    const nose = new THREE.Mesh(noseGeo, shellMat);
+    nose.position.set(0, 1.8, 6.7);
+    podGroup.add(nose);
+
+    // Kapsül Altı Dağıtılmış Elektromıknatıslar (8 Adet Silindirik V1 Modeli)
+    const podMagnets = [];
+    const magPositions = [
+        [-2.8, -0.6, 4.5], [2.8, -0.6, 4.5],   // Ön Sol/Sağ
+        [-2.8, -0.6, 1.5], [2.8, -0.6, 1.5],   // Orta Ön Sol/Sağ
+        [-2.8, -0.6, -1.5], [2.8, -0.6, -1.5], // Orta Arka Sol/Sağ
+        [-2.8, -0.6, -4.5], [2.8, -0.6, -4.5]  // Arka Sol/Sağ
+    ];
+
+    const smallMagGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.8, 24);
+    magPositions.forEach(pos => {
+        const m = new THREE.Mesh(smallMagGeo, copperCoilMat);
+        m.position.set(pos[0], pos[1], pos[2]);
+        podGroup.add(m);
+        podMagnets.push(m);
+    });
+
+    // --- MÜHENDİSLİK HESAPLAMA VE SİMÜLASYON FONKSİYONU ---
+    let currentStage = 1;
+    let isAnimating = false;
+    let podSpeed = 0;
+    let targetPlateY = -1.2;
+
+    function recalc() {
+        const N = parseFloat(document.getElementById('inputN').value) || 500;
+        const I = parseFloat(document.getElementById('inputI').value) || 4.8;
+        const g_mm = parseFloat(document.getElementById('inputG').value) || 5.0;
+        const D_mm = parseFloat(document.getElementById('inputD').value) || 30.0;
+        const magCount = parseInt(document.getElementById('inputMagCount').value) || 8;
+        const podMass = parseFloat(document.getElementById('inputPodMass').value) || 120.0;
+
+        document.getElementById('valN').innerText = N + " Tur";
+        document.getElementById('valI').innerText = I.toFixed(2) + " A";
+        document.getElementById('valG').innerText = g_mm.toFixed(1) + " mm";
+        document.getElementById('valD').innerText = D_mm.toFixed(1) + " mm";
+        document.getElementById('valMagCount').innerText = magCount + " Adet";
+        document.getElementById('valPodMass').innerText = podMass + " kg";
+
+        // V1 Doğrulanmış Referansı: N=500, I=4.8A, g=5mm -> B ≈ 185 mT (0.185 T), F_em ≈ 0.4823 N
+        // Ölçeklendirme: B ∝ (N · I) / g
+        const refMMF = 500 * 4.8; // 2400 A·t
+        const refG = 5.0; // mm
+        const currentMMF = N * I;
+        
+        // Akı yoğunluğu (Tesla)
+        const B = (0.185 * (currentMMF / refMMF) * (refG / g_mm));
+        const B_capped = Math.min(B, 1.85); // Steel 1008 doyum sınırı
+
+        // Kuvvet: F ∝ B^2 · Area (D^2)
+        const refArea = Math.PI * Math.pow(15.0, 2);
+        const currArea = Math.PI * Math.pow(D_mm / 2, 2);
+        const areaRatio = currArea / refArea;
+
+        // Tekil silindirik elektromıknatıs kuvveti (N)
+        const Fem = 0.48233 * Math.pow(B_capped / 0.185, 2) * areaRatio;
+
+        // Hyperloop Toplam Kuvvet ve Kapsül Yükü
+        const F_total = Fem * magCount;
+        const F_gravity = podMass * 9.81;
+
+        // Metrikleri Güncelle
+        document.getElementById('metricFem').innerText = Fem.toFixed(3) + " N";
+        document.getElementById('metricB').innerText = (B_capped * 1000).toFixed(1) + " mT";
+        document.getElementById('metricFg').innerText = F_gravity.toFixed(1) + " N";
+        document.getElementById('metricFtotal').innerText = F_total.toFixed(2) + " N";
+        document.getElementById('metricSubTotal').innerText = `${magCount} Adet Silindirik Aktüatör Toplamı`;
+
+        document.getElementById('hudMetrics').innerText = `Akım: ${I.toFixed(1)}A | Sarım: ${N}T | Hava Aralığı: ${g_mm.toFixed(1)}mm | B: ${(B_capped * 1000).toFixed(0)} mT | F_tek: ${Fem.toFixed(3)}N`;
+
+        // 3D Modelde Hava Aralığı ve Levitasyon Konumu
+        // 5mm = -1.2 Y birimi
+        const gapOffset = (g_mm - 5.0) * 0.15;
+        targetPlateY = -1.2 - gapOffset;
+
+        buildCylindricalFluxLines(B_capped / 0.35);
+
+        // Kapsül Levitasyon Yüksekliği (Hyperloop modunda)
+        const levitationSuccess = F_total >= F_gravity;
+        const podTargetY = levitationSuccess ? (-0.6 + 0.3) : (-0.6 - 0.2);
+        podGroup.position.y = podTargetY;
+
+        const warnBox = document.getElementById('scaleWarning');
+        if (levitationSuccess) {
+            warnBox.className = "callout callout-info";
+            warnBox.innerHTML = `✅ <strong>Levitasyon Dengesi Sağlandı:</strong> Toplam elektromanyetik kaldırma kuvveti (${F_total.toFixed(1)} N), kapsül ağırlığını (${F_gravity.toFixed(1)} N) karşılamaktadır.`;
         } else {
-            alertBox.className = "status-bar status-warn";
-            alertBox.innerHTML = `⚠️ YETERSİZ KALDIRMA KUVVETİ: Kaldırma kuvveti (${F_mag.toFixed(1)} N) kütle yükünden (${W.toFixed(1)} N) düşüktür. Akımı veya sarımı artırınız!`;
+            warnBox.className = "callout callout-warn";
+            warnBox.innerHTML = `⚠️ <strong>Ölçek Uyarısı (TÜBİTAK 2209-B):</strong> ${magCount} adet V1 silindirik aktüatörün toplam kuvveti (${F_total.toFixed(2)} N), ${podMass} kg'lık kapsülün ağırlığını (${F_gravity.toFixed(1)} N) kaldıramaz. V1'in bilimsel rolü PID kontrol ve sensör geri beslemesini kanıtlamaktır.`;
+        }
+    }
+
+    // --- SAHNE GEÇİŞ YÖNETİMİ (1, 2, 3, 4) ---
+    function switchStage(stageNum) {
+        currentStage = stageNum;
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById('tab' + i).className = (i === stageNum) ? 'stage-tab active' : 'stage-tab';
         }
 
-        // 3D Modelde Hava Aralığı Konumunu Güncelle
-        // g_mm = 5mm -> aralık = 1.0 birim
-        const gapUnits = THREE.MathUtils.mapLinear(g_mm, 1, 20, 0.4, 2.8);
-        targetArmatureY = (magnetGroup.position.y - 2.6) - gapUnits - 0.4;
+        const hudTitle = document.getElementById('hudStageTitle');
 
-        // Akı yoğunluğuna göre renk belirleme (FEA Spectral Color)
-        let fluxColor = 0x38bdf8;
-        if (B > 1.6) fluxColor = 0xef4444;      // Kırmızı (Doyum)
-        else if (B > 1.2) fluxColor = 0xf59e0b; // Turuncu
-        else if (B > 0.8) fluxColor = 0x22c55e; // Yeşil
-        createFluxCurves(fluxColor, B / 1.8);
+        if (stageNum === 1) {
+            // Lab Modu (Silindirik Aktüatör)
+            stage1Group.visible = true;
+            hyperloopGroup.visible = false;
+            hudTitle.innerText = "🔬 1. ELECTROMAGNET LABORATORY — V1 SILINDIRIK NUVE DETAYI";
+            camera.position.set(0, 4, 11);
+            controls.target.set(0, 0.5, 0);
+        } else if (stageNum === 2) {
+            // Hyperloop Entegrasyon Modu
+            stage1Group.visible = false;
+            hyperloopGroup.visible = true;
+            hudTitle.innerText = "🚅 2. HYPERLOOP INTEGRATION — KAPSUL ALTI ELEKTROMIKNATIS YERLEŞIMI";
+            camera.position.set(10, 8, 14);
+            controls.target.set(0, 0, 0);
+        } else if (stageNum === 3) {
+            // Full Ray & Hareket Simülasyonu
+            stage1Group.visible = false;
+            hyperloopGroup.visible = true;
+            hudTitle.innerText = "🚀 3. FULL SYSTEM SIMULATION — RAY KILAVUZU & HAREKET DINAMIGI";
+            camera.position.set(16, 12, 24);
+            controls.target.set(0, 0, 0);
+        } else if (stageNum === 4) {
+            // Dashboard Karşılaştırma Modu
+            stage1Group.visible = true;
+            hyperloopGroup.visible = true;
+            stage1Group.position.set(-6, 0, 0);
+            hyperloopGroup.position.set(8, 0, 0);
+            hudTitle.innerText = "⚖️ 4. VERSION COMPARISON — V1 SILINDIRIK vs HYPERLOOP KAPSUL MİMARİSİ";
+            camera.position.set(0, 10, 26);
+            controls.target.set(0, 0, 0);
+        }
+
+        if (stageNum !== 4) {
+            stage1Group.position.set(0, 0, 0);
+            hyperloopGroup.position.set(0, 0, 0);
+        }
     }
 
-    // Kamera Kontrol Kısayolları
-    function resetCamera() {
-        camera.position.set(0, 5, 14);
-        controls.target.set(0, 0, 0);
+    function changeVersion() {
+        const v = document.getElementById('versionSelect').value;
+        const vLbl = document.getElementById('vLabel');
+        const vNote = document.getElementById('v1Note');
+
+        if (v === 'v1') {
+            vLbl.innerText = "Version 1 (V1 - Silindirik)";
+            document.getElementById('inputN').value = 500;
+            document.getElementById('inputI').value = 4.8;
+            document.getElementById('inputG').value = 5.0;
+            document.getElementById('inputD').value = 30;
+            vNote.innerHTML = "📌 <strong>Versiyon 1 (Doğrulanmış):</strong> Silindirik Steel 1008 nüve, 500 tur, 4.8A uyarım, 5mm hava aralığı. Ansys Maxwell FEA kuvvet sonucu: <strong>0.48233 N</strong>.";
+        } else {
+            vLbl.innerText = "Version 2 (V2 - Yeni Geometri - Konsept)";
+            document.getElementById('inputN').value = 850;
+            document.getElementById('inputI').value = 6.0;
+            document.getElementById('inputG').value = 4.0;
+            document.getElementById('inputD').value = 55;
+            vNote.innerHTML = "💡 <strong>Versiyon 2 (Planlanan Konsept):</strong> Gelişmiş manyetik devre ve optimize edilmiş kutup geometrisi. Kesin simülasyon ve CAD boyutları TÜBİTAK araştırma aşamasında güncellenecektir.";
+        }
+        recalc();
     }
-    function setTopView() {
-        camera.position.set(0, 16, 0.1);
-        controls.target.set(0, 0, 0);
+
+    // Kamera ve Animasyon
+    function resetCam() {
+        switchStage(currentStage);
     }
-    function setSideView() {
-        camera.position.set(16, 0.5, 0);
-        controls.target.set(0, 0, 0);
+
+    function toggleAnimation() {
+        isAnimating = !isAnimating;
+        const btn = document.getElementById('btnAnim');
+        if (isAnimating) {
+            btn.className = "btn-action btn-run";
+            btn.innerText = "⏸ Hareketi Durdur";
+        } else {
+            btn.className = "btn-action";
+            btn.innerText = "▶ Ray Simülasyonu";
+        }
+    }
+
+    function toggleCoilCut() {
+        cylCoilMesh.visible = !cylCoilMesh.visible;
     }
 
     // Pencere Boyutlandırma
     window.addEventListener('resize', () => {
-        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.aspect = viewport.clientWidth / viewport.clientHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setSize(viewport.clientWidth, viewport.clientHeight);
     });
 
-    // Animasyon Döngüsü (Pürüzsüz Havada Salınım Fiziği)
-    let clock = new THREE.Clock();
+    // --- ANİMASYON DÖNGÜSÜ (PÜRÜZSÜZ FİZİK & HAREKET KİNEMATİĞİ) ---
+    const clock = new THREE.Clock();
     function animate() {
         requestAnimationFrame(animate);
-        const elapsedTime = clock.getElapsedTime();
+        const dt = clock.getDelta();
+        const elapsed = clock.getElapsedTime();
 
-        // Armature pozisyonunu lerp ile yumuşak hareket ettir + hafif mikro süzülme titreşimi
-        const hoverJitter = Math.sin(elapsedTime * 4) * 0.025;
-        armatureMesh.position.y += (targetArmatureY + hoverJitter - armatureMesh.position.y) * 0.1;
+        // 1. Hedef plakanın yumuşak hareketi + mikro süzülme titreşimi
+        const jitter = Math.sin(elapsed * 5) * 0.02;
+        targetPlateMesh.position.y += (targetPlateY + jitter - targetPlateMesh.position.y) * 0.1;
+
+        // 2. Hyperloop Kapsül Ray Hareketi (Kinematik Simülasyon)
+        if (isAnimating && (currentStage === 2 || currentStage === 3 || currentStage === 4)) {
+            podGroup.position.z += 12 * dt; // 12 m/s temsili seyir hızı
+            if (podGroup.position.z > trackLength / 2 - 5) {
+                podGroup.position.z = -trackLength / 2 + 5;
+            }
+            // Kapsülde hafif ray levitasyon salınımı
+            podGroup.position.y += Math.sin(elapsed * 8) * 0.003;
+        }
 
         controls.update();
         renderer.render(scene, camera);
     }
 
-    // Başlat
-    updateSimulation();
+    // Başlangıç
+    recalc();
     animate();
 </script>
 
