@@ -6,6 +6,17 @@
 <title>TÜBİTAK 2209-B · Hyperloop Elektromanyetik Levitasyon Dijital İkiz Stüdyosu (v3.2)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+window.onerror = function(msg, url, line, col, err) {
+  document.title = 'JS_ERROR: ' + msg + ' LINE:' + line + ' COL:' + col;
+  var b = document.body || document.documentElement;
+  var d = document.createElement('div');
+  d.id = 'criticalErrorBanner';
+  d.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:red;color:white;font-size:20px;z-index:999999;padding:20px;';
+  d.textContent = 'KRITIK JS HATASI: ' + msg + ' (Satır: ' + line + ', Sütun: ' + col + ')';
+  b.appendChild(d);
+};
+</script>
 <style>
 :root {
   /* Renk Paleti (Koyu Lacivert Mühendislik Teması) */
@@ -1618,11 +1629,7 @@ function update() {
   const Ftot = F * p.n;
   const Wlab = p.mLab * GRAV;
 
-  // Level-1 Metrik Kartları
-  $('mF').textContent = fmtN(F);
-  const atP1 = p.N === 500 && p.D === 10 && p.g === 5 && Math.abs(p.I - 1.0) < 1e-6;
-  const atP2 = p.N === 500 && p.D === 10 && p.g === 5 && Math.abs(p.I - 4.8) < 1e-6;
-    // FEA DoÄŸrulama Matrisi ve Metrik KartlarÄ± (AÅAMA 1 & 3)
+      // FEA DoÄŸrulama Matrisi ve Metrik KartlarÄ± (AÅAMA 1 & 3)
   $('mF').textContent = fmtN(F);
   const atP1 = p.N === 500 && p.D === 10 && p.g === 5 && Math.abs(p.I - 1.0) < 1e-6;
   const atP2 = p.N === 500 && p.D === 10 && p.g === 5 && Math.abs(p.I - 4.8) < 1e-6;
