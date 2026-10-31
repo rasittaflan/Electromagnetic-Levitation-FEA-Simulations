@@ -1,0 +1,25 @@
+# .gitignore for Ansys Maxwell & MATLAB/Simulink projects
+# Mesh result directories (large binary scratch files)
+*.aedtresults/
+*.aedt.lock
+*.asol
+*.auto
+*.dcm
+*.pjt
+*.tmp
+*~
+
+# MATLAB autosaves & temporary files
+*.asv
+*.slxc
+slprj/
+*.autosave
+
+# Microsoft Office temporary files
+~$*.docx
+~$*.pptx
+~$*.xlsx
+
+# OS generated files
+Thumbs.db
+.DS_Store
