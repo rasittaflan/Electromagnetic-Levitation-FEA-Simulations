@@ -48,7 +48,8 @@ You can modify coil turns ($N$), excitation current ($I$), air gap ($g$), and po
 | Parameter / Parametre | Specification / Değer | Engineering Impact / Mühendislik Etkisi |
 | :--- | :--- | :--- |
 | **Target Working Air Gap ($g$)** / Hedef Hava Aralığı | **$5\text{ mm}$** | Stable levitation operating point for industrial conveyor/transport applications. *(Kararlı çalışma noktası)* |
-| **Lifting Force Capacity ($F_{mag}$)** / Kaldırma Kuvveti | **$\ge 130\text{ N}$** | High force-to-volume ratio verified across 2D/3D static FEA models. *(2D/3D statik FEA ile doğrulanmış güç)* |
+| **V1 Verified Force ($F_{em, V1}$)** / Doğrulanmış V1 Kuvveti | **$0.4823\text{ N}$ @ $4.8\text{ A}$**<br/>($22.26\text{ mN}$ @ $1.0\text{ A}$) | Single cylindrical Steel 1008 actuator (r=5mm, L=30mm), verified via Ansys Maxwell 2D/3D FEA. *(Doğrulanmış PID prototipi)* |
+| **V2 High-Force Target ($F_{target}$)** / V2 Tasarım Hedefi | **$\ge 130\text{ N}$ (Hedef)** | Research design target for high-force U-core distributed pod actuator array. *(Planlanan araç entegrasyonu)* |
 | **Excitation Current ($I_{nom}$)** / Nominal Uyarım Akımı | **$4.8\text{ A}$** | Optimized for thermal durability and conductor current density limits ($J \le 4.5\text{ A/mm}^2$). *(Isıl dayanım)* |
 | **Core Material** / Nüve Malzemesi | **Silicon Steel / Soft Magnetic** | High magnetic saturation flux density ($B_{sat} \approx 1.8\text{ T}$) minimizing core losses. *(Düşük kayıp)* |
 | **Control Strategy** / Kontrol Algoritması | **PID + Anti-Windup + Limiter** | Real-time position tracking and disturbance rejection under external load variations. *(Konum takibi)* |
@@ -130,7 +131,7 @@ Electromagnetic-Levitation-FEA-Simulations/
 
 ## 🎯 Projenin Amacı ve Teknik Başarımları
 
-1. **Manyetik Doğrulama:** $5\text{ mm}$ hedef hava aralığında $4.8\text{ A}$ nominal bobin akımı ile $\ge 130\text{ N}$ levitasyon kaldırma kuvveti Ansys Maxwell modelleri ile analitik ve nümerik olarak doğrulanmıştır.
+1. **Manyetik Doğrulama (V1):** $5\text{ mm}$ hedef hava aralığında tekil silindirik aktüatör ile $1.0\text{ A}$ uyarımda $22.255\text{ mN}$, $4.8\text{ A}$ nominal uyarımda $0.48233\text{ N}$ kaldırma kuvveti Ansys Maxwell 2D/3D modelleri ile nümerik olarak doğrulanmıştır. Çoklu aktüatör ve yüksek kuvvet ($\ge 130\text{ N}$) V2 geliştirme aşaması tasarım hedefi olarak belirlenmiştir.
 2. **Mesh ve Çözücü Yakınsaması:** Farklı mesh yoğunlukları test edilerek enerji hatası minimize edilmiş, manyetik akı yoğunluğu doyum sınırları ($B \le 1.8\text{ T}$) içinde tutulmuştur.
 3. **Sistem Dinamiği ve Kararlılık:** Ansys simülasyonlarından elde edilen doğrusal olmayan kuvvet-akım-mesafe karakteristikleri MATLAB/Simulink ortamına aktarılmış; PID + Anti-Windup denetleyici ile 300 saniyelik sürekli çalışma ve ısıl dayanım testleri gerçekleştirilmiştir.
 

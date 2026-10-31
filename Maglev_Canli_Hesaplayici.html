@@ -190,6 +190,7 @@ header .sub {
   font-weight: 600;
 }
 .btn-mini:hover { background: #263855; color: #fff; border-color: var(--accent-cyan); }
+.btn-mini.active { background: var(--accent-cyan); color: #0c121e; border-color: var(--accent-cyan); font-weight: 700; }
 
 /* KONTROLLER */
 .cg { margin-bottom: 14px; }
@@ -524,10 +525,10 @@ footer { margin-top: 16px; font-size: 12.5px; color: var(--text-dim); text-align
 
   <!-- SEKMELER (4 AŞAMA) -->
   <div class="tabs">
-    <button class="tab" id="tab1" onclick="switchStage(1)">🔬 1. V1 Elektromıknatıs Laboratuvarı</button>
-    <button class="tab active" id="tab2" onclick="switchStage(2)">🚅 2. Hyperloop Kapsül Entegrasyonu</button>
-    <button class="tab" id="tab3" onclick="switchStage(3)">🚀 3. Ray / Tüp Hareket Gösterimi</button>
-    <button class="tab" id="tab4" onclick="switchStage(4)">⚖️ 4. V1 – V2 Karşılaştırması</button>
+    <button class="tab" id="tab1" onclick="switchStage(1, true)">🔬 1. V1 Elektromıknatıs Laboratuvarı</button>
+    <button class="tab active" id="tab2" onclick="switchStage(2, true)">🚅 2. Hyperloop Kapsül Entegrasyonu</button>
+    <button class="tab" id="tab3" onclick="switchStage(3, true)">🚀 3. Ray / Tüp Hareket Gösterimi</button>
+    <button class="tab" id="tab4" onclick="switchStage(4, true)">⚖️ 4. V1 – V2 Karşılaştırması</button>
   </div>
 
   <!-- ÜÇ SÜTUNLU ANA YERLEŞİM -->
@@ -612,6 +613,33 @@ footer { margin-top: 16px; font-size: 12.5px; color: var(--text-dim); text-align
         </div>
       </div>
 
+      <!-- Kinematik Kontroller (Sekme 3) -->
+      <div id="ctrlSectionKinematics" style="display:none;">
+        <h2 style="margin-top:16px;">
+          <span>🚄 Ray &amp; Tüp Dinamiği</span>
+          <span class="tag ta">Kinematik Model</span>
+        </h2>
+        <div class="cg">
+          <label>Hedef Seyir Hızı (v): <b id="oTargetV">250 km/h</b></label>
+          <input type="range" id="inTargetV" min="50" max="600" step="10" value="250" oninput="updateKinematicsUI()">
+        </div>
+        <div class="cg">
+          <label>İvmelenme Oranı (a): <b id="oTargetA">4.5 m/s² (0.46 g)</b></label>
+          <input type="range" id="inTargetA" min="1.0" max="12.0" step="0.5" value="4.5" oninput="updateKinematicsUI()">
+        </div>
+        <div class="cg">
+          <label>Tüp İç Basıncı (P_tube): <b id="oTubeP">100 Pa (Düşük Vakum)</b></label>
+          <select id="inTubeP" onchange="updateKinematicsUI()">
+            <option value="100" selected>100 Pa · Hyperloop Standardı (Düşük Vakum)</option>
+            <option value="1000">1,000 Pa · Kısmi Vakum Deneyi</option>
+            <option value="101325">101,325 Pa · Atmosferik Açık Hava Basıncı</option>
+          </select>
+        </div>
+        <div class="note ni" style="font-size:12px;margin-top:10px;">
+          ⚠️ <strong>Kinematik Gösterim Notu:</strong> Bu modül, kapsülün tüp içi kinematik hareketini ve temel enerji/direnç büyüklüklerini göstermektedir; tam aerodinamik CFD veya LSM lineer motor simülasyonu değildir.
+        </div>
+      </div>
+
       <div class="note ni" id="verNote">
         📌 <strong>V1 Doğrulama Referansı:</strong> Steel 1008 silindirik nüve Ø10×30 mm, bobin r 6–11 mm × 20 mm, 500 tur, hedef disk Ø10×5 mm, g = 5.0 mm (ANSYS Maxwell AEDT modeli).
       </div>
@@ -677,7 +705,10 @@ footer { margin-top: 16px; font-size: 12.5px; color: var(--text-dim); text-align
       <h2>
         <span>📊 Mühendislik Sonuçları</span>
         <div class="panel-ctrl-btns">
-          <button class="btn-mini" id="btnExpandRight" onclick="toggleRightWidth()" title="Genişlet / Daralt">◨ Paneli Genişlet</button>
+          <span style="font-size:11.5px;color:#94a3b8;">Genişlik:</span>
+          <button class="btn-mini active" id="btnW380" onclick="setRightWidth(380)" title="Standart Genişlik (380px)">380px</button>
+          <button class="btn-mini" id="btnW480" onclick="setRightWidth(480)" title="Geniş Görünüm (480px)">480px</button>
+          <button class="btn-mini" id="btnW580" onclick="setRightWidth(580)" title="Tam Detay (580px)">580px</button>
         </div>
       </h2>
 
@@ -745,13 +776,37 @@ footer { margin-top: 16px; font-size: 12.5px; color: var(--text-dim); text-align
         </div>
       </div>
 
+      <!-- Metrik 5: Kinematik Hareket & Enerji (Sekme 3 öncelikli) -->
+      <div class="m" id="cardKinematics" style="display:none;border-left-color:var(--accent-emerald);">
+        <div class="l">
+          <span>Kinematik Seyir &amp; Enerji</span>
+          <span class="tag tf">Kinematik Model</span>
+        </div>
+        <div class="v" id="mKinSpeed" style="color:var(--accent-emerald);">0.0 km/h (0.0 m/s)</div>
+        <div class="sub-val" id="mKinSummary" style="font-size:13px;color:#e2e8f0;margin-top:6px;line-height:1.4;">
+          Yol: <b>0.0 m</b> | Süre: <b>0.0 s</b> | E_k: <b>0.0 kJ</b>
+        </div>
+        <button class="details-btn" onclick="toggleDetails('dKin')">▾ Hız, Direnç &amp; Güç Ayrıntıları</button>
+        <div class="details-box" id="dKin">
+          <p><strong>Model Tipi:</strong> 1-DoF Kinematik + Aerodinamik Sürükleme Modeli</p>
+          <p id="kinDragInfo"><strong>Tüp Havası Direnci (Fd):</strong> 0.0 N (100 Pa vakum sayesinde %99.9 direnç tasarrufu)</p>
+          <p id="kinPowerInfo"><strong>Gereken İvmelenme Gücü (P):</strong> 0.0 kW</p>
+          <p id="kinTargetInfo"><strong>Hedef Hız:</strong> 250 km/h | <strong>İvme:</strong> 4.5 m/s² | <strong>Kütle:</strong> 120 kg</p>
+          <div class="note ni" style="font-size:12px;margin-top:8px;">
+            ℹ️ <strong>Mühendislik Açıklaması:</strong> Bu model, tüp içi kinematik hareketi ve temel enerji/direnç büyüklüklerini gösteren basitleştirilmiş bir mühendislik modelidir; tam aerodinamik CFD veya LSM lineer motor simülasyonu değildir.
+          </div>
+        </div>
+      </div>
+
+      <!-- GRAFİKLER BÖLÜMÜ -->
+      <div id="chartsContainer">
       <!-- GRAFİKLER -->
       <h2 style="margin-top:16px;">
         <span>📈 Dinamik Grafikler &amp; Tepki</span>
       </h2>
 
       <!-- Grafik 1: PID Basamak Yanıtı -->
-      <div class="chart">
+      <div class="chart" id="chartPID">
         <div class="h">
           <span>Hava Aralığı PID Yanıtı z(t)</span>
           <div class="chart-actions">
@@ -768,7 +823,7 @@ footer { margin-top: 16px; font-size: 12.5px; color: var(--text-dim); text-align
       </div>
 
       <!-- Grafik 2: F - g Kuvvet Karakteristiği -->
-      <div class="chart">
+      <div class="chart" id="chartFG">
         <div class="h">
           <span>Kuvvet - Boşluk Eğrisi F(g)</span>
           <div class="chart-actions">
@@ -783,13 +838,15 @@ footer { margin-top: 16px; font-size: 12.5px; color: var(--text-dim); text-align
         </div>
       </div>
 
+      </div><!-- /chartsContainer -->
+
       <!-- UYARI LİSTESİ -->
       <div id="warns"></div>
     </div>
   </div>
 
   <!-- ALT BİLGİ & DOĞRULAMA MASASI (Sekme 4 ve Genel İnceleme) -->
-  <div class="panel" style="margin-top:16px;">
+  <div class="panel" id="validationPanel" style="margin-top:16px;">
     <h2>
       <span>🧾 TÜBİTAK 2209-B Bilimsel Veri ve FEA Doğrulama Matrisi</span>
       <span style="font-size:12.5px;color:#94a3b8;font-weight:normal;">Sürüm v3.2 · IEEE &amp; TÜBİTAK Standartları</span>
@@ -1568,7 +1625,14 @@ function updateHUD(p, F, B) {
     xray: '👁️ Şeffaf Gövde / Alt Şasi Analizi'
   };
   $('hudT').textContent = titles[stage];
-  $('hudM').textContent = `N=${p.N}T | I=${p.I.toFixed(1)} A | g=${p.g.toFixed(1)} mm | D=${p.D} mm → F_em=${fmtN(F)} | B_gap=${(B * 1000).toFixed(0)} mT`;
+  if (stage === 3) {
+    const tV = $('inTargetV') ? $('inTargetV').value : '250';
+    const tA = $('inTargetA') ? $('inTargetA').value : '4.5';
+    const tP = $('inTubeP') ? $('inTubeP').value : '100';
+    $('hudM').textContent = `Hedef Hız=${tV} km/h | İvme=${tA} m/s² | Basınç=${tP} Pa | Kinematik Model`;
+  } else {
+    $('hudM').textContent = `N=${p.N}T | I=${p.I.toFixed(1)} A | g=${p.g.toFixed(1)} mm | D=${p.D} mm → F_em=${fmtN(F)} | B_gap=${(B * 1000).toFixed(0)} mT`;
+  }
   $('hudS').textContent = `Aktif Katman: ${layerNames[activeLayer]}`;
 }
 
@@ -1977,18 +2041,76 @@ function exportCSV(type) {
 /* =====================================================================
    9) SEKMELERE ÖZEL ARAYÜZ VE GENİŞLETİLEBİLİR YERLEŞİM
    ===================================================================== */
-function toggleRightWidth() {
-  isRightExpanded = !isRightExpanded;
+function setRightWidth(px) {
   const grid = $('mainGrid');
-  const btn = $('btnExpandRight');
-  if (isRightExpanded) {
-    grid.style.setProperty('--col-right', '520px');
-    btn.textContent = '◨ Paneli Daralt';
-  } else {
-    grid.style.setProperty('--col-right', '380px');
-    btn.textContent = '◨ Paneli Genişlet';
-  }
+  grid.style.setProperty('--col-right', px + 'px');
+  [380, 480, 580].forEach(w => {
+    const b = $('btnW' + w);
+    if (b) {
+      if (w === px) b.classList.add('active');
+      else b.classList.remove('active');
+    }
+  });
   setTimeout(() => { resize(); update(); }, 260);
+}
+
+let kinCurrentSpeed = 0; // m/s
+let kinTotalDistance = 0; // m
+let kinElapsedTime = 0; // s
+
+function updateKinematicsUI() {
+  const targetV_kmh = +$('inTargetV').value;
+  const accel = +$('inTargetA').value;
+  const tubeP = +$('inTubeP').value;
+
+  $('oTargetV').textContent = targetV_kmh + ' km/h';
+  $('oTargetA').textContent = accel.toFixed(1) + ' m/s² (' + (accel / 9.81).toFixed(2) + ' g)';
+
+  let pLabel = tubeP.toLocaleString('tr-TR') + ' Pa';
+  if (tubeP === 100) pLabel += ' (Hyperloop Düşük Vakum)';
+  else if (tubeP === 1000) pLabel += ' (Kısmi Vakum Deneyi)';
+  else pLabel += ' (Atmosferik 1 atm)';
+  $('oTubeP').textContent = pLabel;
+
+  updateKinematicsTelemetry();
+}
+
+function updateKinematicsTelemetry() {
+  if (!$('mKinSpeed')) return;
+  const v_kmh = kinCurrentSpeed * 3.6;
+  $('mKinSpeed').textContent = v_kmh.toFixed(1) + ' km/h (' + kinCurrentSpeed.toFixed(1) + ' m/s)';
+
+  const m_pod = $('inM') ? +$('inM').value : 120;
+  const Ek_kJ = 0.5 * m_pod * Math.pow(kinCurrentSpeed, 2) / 1000;
+  $('mKinSummary').innerHTML = 'Yol: <b>' + kinTotalDistance.toFixed(1) + ' m</b> | Süre: <b>' + kinElapsedTime.toFixed(1) + ' s</b> | E_k: <b>' + Ek_kJ.toFixed(1) + ' kJ</b>';
+
+  // Aerodinamik sürükleme: F_d = 0.5 * rho * Cd * A * v^2
+  const tubeP = $('inTubeP') ? +$('inTubeP').value : 100;
+  const rho = 1.225 * (tubeP / 101325);
+  const Cd = 0.16;
+  const Area = 1.5; // m^2
+  const Fd = 0.5 * rho * Cd * Area * Math.pow(kinCurrentSpeed, 2);
+
+  const accel = $('inTargetA') ? +$('inTargetA').value : 4.5;
+  const targetV_mps = ($('inTargetV') ? +$('inTargetV').value : 250) / 3.6;
+  const isAccelerating = kinCurrentSpeed < targetV_mps - 0.1;
+  const F_thrust = isAccelerating ? (m_pod * accel + Fd) : Fd;
+  const Power_kW = (F_thrust * kinCurrentSpeed) / 1000;
+
+  const dragSavingPct = ((1 - (tubeP / 101325)) * 100).toFixed(1);
+
+  if ($('kinDragInfo')) {
+    $('kinDragInfo').innerHTML = '<strong>Tüp Havası Direnci (Fd):</strong> ' + Fd.toFixed(2) + ' N ' +
+      '<span style="color:var(--accent-emerald);font-size:12px;">(' + tubeP + ' Pa vakum ile %' + dragSavingPct + ' tasarruf)</span>';
+  }
+  if ($('kinPowerInfo')) {
+    $('kinPowerInfo').innerHTML = '<strong>' + (isAccelerating ? 'İvmelenme Gücü (P_acc):' : 'Seyir Gücü (P_cruise):') + '</strong> ' +
+      Power_kW.toFixed(2) + ' kW (' + (Power_kW * 1.341).toFixed(1) + ' HP)';
+  }
+  if ($('kinTargetInfo')) {
+    $('kinTargetInfo').innerHTML = '<strong>Hedef Hız:</strong> ' + ($('inTargetV') ? $('inTargetV').value : 250) + ' km/h | ' +
+      '<strong>İvme:</strong> ' + accel.toFixed(1) + ' m/s² | <strong>Kütle:</strong> ' + m_pod + ' kg';
+  }
 }
 
 function toggleDetails(boxId) {
@@ -1996,7 +2118,7 @@ function toggleDetails(boxId) {
   box.classList.toggle('open');
 }
 
-function switchStage(n) {
+function switchStage(n, isUserClick = false) {
   stage = n;
   for (let i = 1; i <= 4; i++) {
     $('tab' + i).className = 'tab' + (i === n ? ' active' : '');
@@ -2009,15 +2131,35 @@ function switchStage(n) {
   tube.visible = (n === 3);
   ground.visible = grid.visible = !isLab;
 
-  // Sekmeye göre Sol/Sağ panel kartlarını optimize et
-  $('ctrlSectionLab').style.display = (n === 1 || n === 4) ? 'block' : 'block';
-  $('ctrlSectionPod').style.display = (n === 2 || n === 3) ? 'block' : 'block';
-  $('ctrlSectionPID').style.display = (n === 1) ? 'block' : 'none';
+  // 1. SOL PANEL KONTROL BÖLÜMLERİ İZOLASYONU
+  if ($('ctrlSectionLab')) $('ctrlSectionLab').style.display = (n === 1 || n === 2 || n === 4) ? 'block' : 'none';
+  if ($('ctrlSectionPod')) $('ctrlSectionPod').style.display = (n === 2 || n === 3 || n === 4) ? 'block' : 'none';
+  if ($('ctrlSectionPID')) $('ctrlSectionPID').style.display = (n === 1) ? 'block' : 'none';
+  if ($('ctrlSectionKinematics')) $('ctrlSectionKinematics').style.display = (n === 3) ? 'block' : 'none';
 
-  $('cardFem').style.display = 'block';
-  $('cardB').style.display = 'block';
-  $('cardCoil').style.display = (n === 1 || n === 4) ? 'block' : 'none';
-  $('cardPod').style.display = (n === 2 || n === 3) ? 'block' : 'block';
+  // 2. SAĞ PANEL KARTLARI İZOLASYONU
+  if ($('cardFem')) $('cardFem').style.display = (n === 1 || n === 2 || n === 4) ? 'block' : 'none';
+  if ($('cardB')) $('cardB').style.display = (n === 1 || n === 2 || n === 4) ? 'block' : 'none';
+  if ($('cardCoil')) $('cardCoil').style.display = (n === 1 || n === 4) ? 'block' : 'none';
+  if ($('cardPod')) $('cardPod').style.display = (n === 2 || n === 4) ? 'block' : 'none';
+  if ($('cardKinematics')) $('cardKinematics').style.display = (n === 3) ? 'block' : 'none';
+
+  // 3. GRAFİKLER BÖLÜMÜ İZOLASYONU
+  if ($('chartsContainer')) $('chartsContainer').style.display = (n === 3) ? 'none' : 'block';
+  if ($('chartPID')) $('chartPID').style.display = (n === 1 || n === 4) ? 'block' : 'none';
+  if ($('chartFG')) $('chartFG').style.display = (n === 1 || n === 2 || n === 4) ? 'block' : 'none';
+
+  // 4. SEKME 4 ÖZEL: DOĞRULAMA VE KARŞILAŞTIRMA PANELİNİ ÖN PLANA ÇIKAR
+  if (n === 4 && isUserClick) {
+    const vp = $('validationPanel');
+    if (vp) {
+      setTimeout(() => {
+        vp.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        vp.style.boxShadow = '0 0 24px rgba(56, 189, 248, 0.5)';
+        setTimeout(() => { vp.style.boxShadow = ''; }, 2500);
+      }, 100);
+    }
+  }
 
   if (isLab) {
     podGroup.position.x = 0;
@@ -2033,8 +2175,8 @@ function switchStage(n) {
   $('btnRun').textContent = running ? '⏸ Hareketi Durdur' : '▶ Ray Hareketi';
 
   update();
+  if (n === 3) updateKinematicsTelemetry();
 }
-
 function camPreset(name) {
   let t, p;
   const isLab = (stage === 1 || stage === 4);
@@ -2119,10 +2261,22 @@ function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
 
   if (running && stage === 3) {
-    const dx = 18 * dt; // 18 m/s kinematik seyir hızı
-    podGroup.position.x += dx;
-    camera.position.x += dx;
-    controls.target.x += dx;
+    const targetV_mps = ($('inTargetV') ? +$('inTargetV').value : 250) / 3.6;
+    const accel = $('inTargetA') ? +$('inTargetA').value : 4.5;
+    if (kinCurrentSpeed < targetV_mps) {
+      kinCurrentSpeed = Math.min(targetV_mps, kinCurrentSpeed + accel * dt);
+    } else if (kinCurrentSpeed > targetV_mps) {
+      kinCurrentSpeed = Math.max(targetV_mps, kinCurrentSpeed - accel * dt);
+    }
+    kinElapsedTime += dt;
+    const dx = kinCurrentSpeed * dt;
+    kinTotalDistance += dx;
+
+    // Viewport ray hareketi (kesintisiz görsel kaydırma)
+    const visualDx = Math.max(8, Math.min(35, kinCurrentSpeed * 0.32)) * dt;
+    podGroup.position.x += visualDx;
+    camera.position.x += visualDx;
+    controls.target.x += visualDx;
     if (podGroup.position.x > GX1 - 10) {
       const back = podGroup.position.x - (GX0 + 10);
       podGroup.position.x -= back;
@@ -2130,7 +2284,10 @@ function animate() {
       controls.target.x -= back;
     }
     placeKeyLight(V3(podGroup.position.x, 0, 0), 3.2);
+
+    updateKinematicsTelemetry();
   }
+
 
   if (activeLayer === 'field') {
     const asm = focusAsm();
